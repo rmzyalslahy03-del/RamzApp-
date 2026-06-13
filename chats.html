@@ -225,6 +225,64 @@
         .popup-item i { width: 20px; font-size: 16px; color: var(--text3); text-align: center; }
         .popup-item.danger { color: #ff4444; }
 
+        /* ========== الزر العائم (FAB) ========== */
+        .fab-container {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            z-index: 200;
+        }
+        .fab-main {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fab-main:active { transform: scale(0.92); }
+        .fab-options {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: 0.2s;
+        }
+        .fab-options.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .fab-option {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .fab-option:hover { background: var(--surface2); }
+
         .global-toast {
             position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
             background: #333; color: #fff; padding: 10px 20px; border-radius: 25px;
@@ -232,7 +290,7 @@
             pointer-events: none; white-space: nowrap; box-shadow: var(--shadow); font-family: 'Cairo';
         }
 
-        @media (max-width: 380px) { .chat-name { font-size: 14px; } .msg-bubble { font-size: 12.5px; } .nav-item { font-size: 9px; } }
+        @media (max-width: 380px) { .chat-name { font-size: 14px; } .nav-item { font-size: 9px; } }
     </style>
 </head>
 <body>
@@ -252,7 +310,7 @@
         <div class="chats-list" id="chatsList"></div>
     </div>
 
-    <!-- شاشة المحادثة (مبسطة - تربط بـ chat.html للنسخة الكاملة) -->
+    <!-- شاشة المحادثة (مبسطة - تربط بـ chat.html) -->
     <div class="screen no-nav" id="chatScreen">
         <div class="app-header">
             <button class="header-btn" id="backFromChatBtn"><i class="fas fa-arrow-right"></i></button>
@@ -263,15 +321,27 @@
         </div>
     </div>
 
-    <!-- شاشة جهات الاتصال -->
+    <!-- شاشة جهات الاتصال (مطورة) -->
     <div class="screen" id="contactsScreen">
         <div class="app-header">
             <button class="header-btn" id="backFromContactsBtn"><i class="fas fa-arrow-right"></i></button>
             <h2>📇 جهات الاتصال</h2>
-            <button class="header-btn" id="addContactBtn"><i class="fas fa-user-plus"></i></button>
+            <div class="header-actions">
+                <button class="header-btn" id="syncContactsBtn" title="مزامنة جهات الاتصال"><i class="fas fa-sync-alt"></i></button>
+            </div>
         </div>
         <div class="search-bar"><input type="text" id="searchContactsInput" placeholder="🔍 بحث في جهات الاتصال..."></div>
         <div class="chats-list" id="contactsList"></div>
+        <!-- الزر العائم (FAB) -->
+        <div class="fab-container" id="fabContainer">
+            <button class="fab-main" id="fabMainBtn"><i class="fas fa-plus"></i></button>
+            <div class="fab-options" id="fabOptions">
+                <button class="fab-option" id="fabAddContact" title="إضافة جهة اتصال"><i class="fas fa-user-plus"></i></button>
+                <button class="fab-option" id="fabRegisterNumber" title="تسجيل رقم"><i class="fas fa-phone-alt"></i></button>
+                <button class="fab-option" id="fabInviteNumber" title="دعوة رقم"><i class="fas fa-share-alt"></i></button>
+                <button class="fab-option" id="fabAddToGroup" title="إضافة لمجموعة"><i class="fas fa-users"></i></button>
+            </div>
+        </div>
     </div>
 
     <!-- شاشة المكالمات -->
@@ -316,8 +386,9 @@
         <div class="settings-list">
             <div class="setting-item" id="themeToggle"><div class="setting-left"><div class="setting-icon"><i class="fas fa-moon"></i></div><span>الوضع الليلي</span></div><div class="toggle-sw active" id="themeSwitch"></div></div>
             <div class="setting-item" id="notifToggle"><div class="setting-left"><div class="setting-icon"><i class="fas fa-bell"></i></div><span>الإشعارات</span></div><div class="toggle-sw active" id="notifSwitch"></div></div>
-            <div class="setting-item" onclick="window.location.href='login.html'; localStorage.removeItem('ramzapp_user');"><div class="setting-left"><div class="setting-icon"><i class="fas fa-sign-out-alt"></i></div><span>تسجيل الخروج</span></div><i class="fas fa-chevron-left" style="color:#ff4444;"></i></div>
-            <p style="text-align:center;color:var(--text3);margin-top:16px;font-size:11px;">Ramz-App v2.0 | جميع الحقوق محفوظة © 2026</p>
+            <div class="setting-item" id="logoutSetting"><div class="setting-left"><div class="setting-icon"><i class="fas fa-sign-out-alt"></i></div><span>تسجيل الخروج</span></div><i class="fas fa-chevron-left" style="color:#ff4444;"></i></div>
+            <div class="setting-item" id="deleteAccountSetting"><div class="setting-left"><div class="setting-icon"><i class="fas fa-trash-alt"></i></div><span>حذف الحساب</span></div><i class="fas fa-chevron-left" style="color:#ff4444;"></i></div>
+            <p style="text-align:center;color:var(--text3);margin-top:16px;font-size:11px;">Ramz-App v3.0 | جميع الحقوق محفوظة © 2026 | المطور: رمزي الصلاحي</p>
         </div>
     </div>
 </div>
@@ -405,6 +476,85 @@
     }
     loadTheme();
 
+    // ==================== دوال جهات الاتصال المتكاملة ====================
+    // جلب معرفات جهات الاتصال المحفوظة للمستخدم الحالي
+    async function fetchUserContacts() {
+        const user = await getCurrentUser();
+        if (!user) return [];
+        const { data, error } = await supabase
+            .from('contacts')
+            .select('contact_id')
+            .eq('user_id', user.id);
+        if (error) return [];
+        return data.map(c => c.contact_id);
+    }
+
+    // جلب بيانات جهات الاتصال الكاملة (اسم، صورة، رقم، حالة الاتصال)
+    async function fetchContactsWithDetails() {
+        const contactIds = await fetchUserContacts();
+        if (!contactIds.length) return [];
+        const { data, error } = await supabase
+            .from('users')
+            .select('id, name, avatar, phone, is_online')
+            .in('id', contactIds);
+        if (error) return [];
+        return data;
+    }
+
+    // إضافة جهة اتصال برقم هاتف (البحث عن المستخدم أولاً)
+    async function addContactByPhone(phoneNumber) {
+        const user = await getCurrentUser();
+        if (!user) throw new Error('Not logged in');
+        const cleaned = phoneNumber.replace(/[\s\-\(\)]/g, '');
+        const { data: existingUser, error: findError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('phone', cleaned)
+            .single();
+        if (findError || !existingUser) throw new Error('رقم الهاتف غير مسجل في RamzApp');
+        const { error } = await supabase
+            .from('contacts')
+            .insert({ user_id: user.id, contact_id: existingUser.id });
+        if (error) {
+            if (error.code === '23505') throw new Error('جهة الاتصال موجودة مسبقاً');
+            throw error;
+        }
+        return existingUser.id;
+    }
+
+    // مزامنة جهات الاتصال من قائمة أرقام (محاكاة/قادمة من الجهاز)
+    async function syncContactsFromDevice(phoneNumbersArray) {
+        const user = await getCurrentUser();
+        if (!user) return [];
+        const cleanedNumbers = phoneNumbersArray.map(p => p.replace(/[\s\-\(\)]/g, ''));
+        const { data: matchedUsers } = await supabase
+            .from('users')
+            .select('id')
+            .in('phone', cleanedNumbers);
+        if (!matchedUsers || !matchedUsers.length) return [];
+        const existingContacts = await fetchUserContacts();
+        const newContacts = matchedUsers.filter(u => !existingContacts.includes(u.id));
+        if (newContacts.length) {
+            const inserts = newContacts.map(c => ({ user_id: user.id, contact_id: c.id }));
+            const { error } = await supabase.from('contacts').insert(inserts);
+            if (error) throw error;
+        }
+        return newContacts.map(c => c.id);
+    }
+
+    // حذف حساب المستخدم بالكامل
+    async function deleteUserAccount() {
+        const user = await getCurrentUser();
+        if (!user) throw new Error('Not logged in');
+        await supabase.from('users').delete().eq('id', user.id);
+        await supabase.auth.signOut();
+        localStorage.removeItem('ramzapp_user');
+        localStorage.removeItem('ramzapp_theme');
+        localStorage.removeItem('ramzapp_notifications');
+        toast('✅ تم حذف الحساب نهائياً');
+        window.location.href = 'login.html';
+    }
+
     // ==================== التنقل بين الشاشات ====================
     let currentScreen = 'chats';
 
@@ -440,44 +590,30 @@
         try {
             const user = await getCurrentUser();
             if (!user) return;
-            const { data: users, error } = await supabase.from('users').select('*').neq('id', user.id);
-            if (error) throw error;
-            if (!users || users.length === 0) {
-                container.innerHTML = '<div class="empty-state"><i class="fas fa-comments"></i><p>لا توجد محادثات بعد</p></div>';
+            // جلب جهات الاتصال المحفوظة فقط
+            const contacts = await fetchContactsWithDetails();
+            if (!contacts.length) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-comments"></i><p>لا توجد محادثات، أضف جهات اتصال أولاً</p></div>';
                 return;
             }
-
-            const chats = await Promise.all(users.map(async (u) => {
-                const { data: lastMsgs } = await supabase.from('messages').select('content, created_at')
-                    .or(`and(sender_id.eq.${user.id},receiver_id.eq.${u.id}),and(sender_id.eq.${u.id},receiver_id.eq.${user.id})`)
-                    .order('created_at', { ascending: false }).limit(1);
-                const { count: unreadCount } = await supabase.from('messages').select('*', { count: 'exact', head: true })
-                    .eq('sender_id', u.id).eq('receiver_id', user.id).neq('status', 'read');
-
-                return {
-                    id: u.id,
-                    name: u.name || 'مستخدم',
-                    avatar: u.avatar || '?',
-                    online: u.is_online,
-                    lastMsg: lastMsgs?.[0]?.content || '',
-                    lastTime: lastMsgs?.[0]?.created_at || u.last_seen,
-                    unread: unreadCount || 0,
-                    pinned: false
-                };
+            // بناء وهمي لآخر رسالة ووقتها (يمكن تحسينه لاحقاً من جدول messages)
+            let chats = contacts.map(c => ({
+                id: c.id,
+                name: c.name || 'مستخدم',
+                avatar: c.avatar || '?',
+                online: c.is_online || false,
+                lastMsg: '',
+                lastTime: null,
+                unread: 0
             }));
-
-            chats.sort((a, b) => new Date(b.lastTime || 0) - new Date(a.lastTime || 0));
-
             if (filter) {
                 const q = filter.toLowerCase();
                 chats = chats.filter(c => c.name.toLowerCase().includes(q));
             }
-
             if (chats.length === 0) {
                 container.innerHTML = '<div class="empty-state"><i class="fas fa-comments"></i><p>لا توجد نتائج</p></div>';
                 return;
             }
-
             container.innerHTML = '';
             chats.forEach(c => {
                 const div = document.createElement('div');
@@ -495,30 +631,25 @@
                 container.appendChild(div);
             });
         } catch (err) {
+            console.error(err);
             container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>تعذر تحميل المحادثات</p></div>';
         }
     }
 
     $('#searchChatsInput').addEventListener('input', (e) => renderChats(e.target.value));
 
-    // ==================== شاشة جهات الاتصال ====================
+    // ==================== شاشة جهات الاتصال (تعرض المحفوظة فقط) ====================
     async function renderContacts(filter = '') {
         const container = $('#contactsList');
         container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">⏳ جاري التحميل...</div>';
         try {
-            const user = await getCurrentUser();
-            if (!user) return;
-            const { data: users, error } = await supabase.from('users').select('*').neq('id', user.id);
-            if (error) throw error;
-            let contacts = (users || []).map(u => ({
-                id: u.id, name: u.name || 'مستخدم', avatar: u.avatar || '?', phone: u.phone || '', online: u.is_online
-            }));
+            let contacts = await fetchContactsWithDetails();
             if (filter) {
                 const q = filter.toLowerCase();
-                contacts = contacts.filter(c => c.name.toLowerCase().includes(q) || c.phone.includes(q));
+                contacts = contacts.filter(c => c.name.toLowerCase().includes(q) || (c.phone && c.phone.includes(q)));
             }
             if (contacts.length === 0) {
-                container.innerHTML = '<div class="empty-state"><i class="fas fa-address-book"></i><p>لا توجد جهات اتصال</p></div>';
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-address-book"></i><p>لا توجد جهات اتصال. أضف جهة اتصال جديدة عبر الزر العائم.</p></div>';
                 return;
             }
             container.innerHTML = '';
@@ -526,12 +657,18 @@
                 const div = document.createElement('div');
                 div.className = 'chat-item';
                 div.innerHTML = `
-                    <div class="chat-avatar">${c.avatar}${c.online ? '<span class="online-dot"></span>' : ''}</div>
+                    <div class="chat-avatar">${c.avatar || '?'}${c.online ? '<span class="online-dot"></span>' : ''}</div>
                     <div class="chat-info">
                         <div class="chat-name-row"><span class="chat-name">${esc(c.name)}</span></div>
-                        <div class="chat-preview"><span class="last-msg">${c.phone}</span></div>
+                        <div class="chat-preview"><span class="last-msg">${c.phone || ''}</span></div>
                     </div>
                     <button class="header-btn" style="color:var(--accent);"><i class="fas fa-comment-dots"></i></button>`;
+                const chatBtn = div.querySelector('.header-btn');
+                chatBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    localStorage.setItem('currentChatId', c.id);
+                    window.location.href = 'chat.html';
+                });
                 div.addEventListener('click', () => {
                     localStorage.setItem('currentChatId', c.id);
                     window.location.href = 'chat.html';
@@ -539,22 +676,84 @@
                 container.appendChild(div);
             });
         } catch (err) {
+            console.error(err);
             container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>تعذر تحميل جهات الاتصال</p></div>';
         }
     }
 
     $('#searchContactsInput').addEventListener('input', (e) => renderContacts(e.target.value));
-    $('#addContactBtn').addEventListener('click', () => {
-        const phone = prompt('📱 أدخل رقم الهاتف:');
-        if (phone) toast('✅ سيتم إضافة الرقم قريباً');
+
+    // ==================== الزر العائم (FAB) ====================
+    let fabVisible = false;
+    const fabMain = $('#fabMainBtn');
+    const fabOptions = $('#fabOptions');
+    function toggleFab() { fabVisible = !fabVisible; if (fabVisible) fabOptions.classList.add('show'); else fabOptions.classList.remove('show'); }
+    fabMain?.addEventListener('click', toggleFab);
+    document.addEventListener('click', (e) => {
+        if (!fabMain?.contains(e.target) && !fabOptions?.contains(e.target)) {
+            fabOptions?.classList.remove('show');
+            fabVisible = false;
+        }
     });
 
-    // ==================== شاشة المكالمات ====================
+    // إضافة جهة اتصال
+    $('#fabAddContact')?.addEventListener('click', async () => {
+        const phone = prompt('📱 أدخل رقم الهاتف (مع رمز الدولة، مثال: +967712345678):');
+        if (phone) {
+            try {
+                await addContactByPhone(phone);
+                toast('✅ تمت إضافة جهة الاتصال');
+                renderContacts($('#searchContactsInput').value);
+            } catch (err) {
+                toast(err.message || '⚠️ فشل إضافة جهة الاتصال');
+            }
+        }
+        toggleFab();
+    });
+
+    // تسجيل رقم (خدمة مستقبلية)
+    $('#fabRegisterNumber')?.addEventListener('click', () => {
+        toast('🔧 سيتم توفير تسجيل رقم جديد قريباً');
+        toggleFab();
+    });
+
+    // دعوة رقم
+    $('#fabInviteNumber')?.addEventListener('click', async () => {
+        const user = await getCurrentUser();
+        if (user) {
+            const link = `${location.origin}/redirect.html?id=${user.id}`;
+            if (navigator.share) navigator.share({ title: 'RamzApp', text: `انضم إلي على RamzApp: ${link}` });
+            else navigator.clipboard.writeText(link).then(() => toast('📋 تم نسخ رابط الدعوة'));
+        } else toast('⚠️ يجب تسجيل الدخول أولاً');
+        toggleFab();
+    });
+
+    // إضافة لمجموعة (قادم)
+    $('#fabAddToGroup')?.addEventListener('click', () => {
+        toast('👥 إضافة لمجموعة - قريباً');
+        toggleFab();
+    });
+
+    // مزامنة جهات الاتصال
+    $('#syncContactsBtn')?.addEventListener('click', async () => {
+        toast('?? جاري مزامنة جهات الاتصال...');
+        // محاكاة أرقام من الجهاز (يمكن استبدالها بـ navigator.contacts لاحقاً)
+        const fakeNumbers = ['+967712345678', '+966501234567'];
+        try {
+            const newContacts = await syncContactsFromDevice(fakeNumbers);
+            if (newContacts.length) toast(`✅ تمت مزامنة ${newContacts.length} جهة اتصال جديدة`);
+            else toast('📭 لا توجد جهات اتصال جديدة');
+            renderContacts($('#searchContactsInput').value);
+        } catch (err) {
+            toast('⚠️ فشل المزامنة');
+        }
+    });
+
+    // ==================== بقية الشاشات (كما هي) ====================
     function renderCalls() {
         $('#callsList').innerHTML = '<div class="empty-state"><i class="fas fa-phone-slash"></i><p>لا توجد مكالمات بعد</p></div>';
     }
 
-    // ==================== شاشة التحديثات ====================
     function renderStories() {
         const bar = $('#storyBar');
         if (!bar) return;
@@ -566,7 +765,6 @@
         if (container) container.innerHTML = '<div class="empty-state"><p>لا توجد قنوات بعد</p></div>';
     }
 
-    // ==================== شاشة الأدوات ====================
     function updateStats() {
         const $sv = $('#statViews');
         const $sc = $('#statCatalog');
@@ -577,7 +775,7 @@
     }
 
     $('#startAdBtn')?.addEventListener('click', () => toast('🚀 إعلان قريباً'));
-    $('#catalogBtn')?.addEventListener('click', () => toast('📦 الكتالوج'));
+    $('#catalogBtn')?.addEventListener('click', () => toast('📦 الكتالوج - قريباً'));
     $('#broadcastBtn')?.addEventListener('click', () => {
         const msg = prompt('📣 اكتب الرسالة الجماعية:');
         if (msg) toast('📣 تم الإرسال');
@@ -587,25 +785,37 @@
     $('#closeModalBtn')?.addEventListener('click', () => $('#userModal').classList.remove('active'));
     $('#userModal')?.addEventListener('click', (e) => { if (e.target === $('#userModal')) $('#userModal').classList.remove('active'); });
 
-    // ==================== القائمة المنبثقة ====================
+    // ==================== القائمة المنبثقة الموحدة (ثلاث نقاط) ====================
     $('#mainMenuBtn')?.addEventListener('click', () => {
         const menu = $('#popupMenu');
         menu.innerHTML = `
             <div class="popup-item" data-action="settings"><i class="fas fa-cog"></i> الإعدادات</div>
             <div class="popup-item" data-action="contacts"><i class="fas fa-address-book"></i> جهات الاتصال</div>
             <div class="popup-item danger" data-action="logout"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</div>
+            <div class="popup-item danger" data-action="deleteAccount"><i class="fas fa-trash-alt"></i> حذف الحساب</div>
         `;
         $('#popupOverlay').classList.add('active');
         menu.querySelectorAll('.popup-item').forEach(item => {
-            item.addEventListener('click', () => {
+            item.addEventListener('click', async () => {
                 const action = item.dataset.action;
                 $('#popupOverlay').classList.remove('active');
                 if (action === 'settings') showScreen('settings');
                 if (action === 'contacts') showScreen('contacts');
-                if (action === 'logout') { localStorage.removeItem('ramzapp_user'); window.location.href = 'login.html'; }
+                if (action === 'logout') {
+                    if (confirm('تسجيل الخروج؟')) {
+                        localStorage.removeItem('ramzapp_user');
+                        window.location.href = 'login.html';
+                    }
+                }
+                if (action === 'deleteAccount') {
+                    if (confirm('⚠️ تحذير: سيتم حذف حسابك وجميع بياناتك نهائياً. هل أنت متأكد؟')) {
+                        await deleteUserAccount();
+                    }
+                }
             });
         });
     });
+
     $('#popupOverlay')?.addEventListener('click', (e) => { if (e.target === $('#popupOverlay')) $('#popupOverlay').classList.remove('active'); });
 
     // ==================== الإعدادات ====================
@@ -618,11 +828,27 @@
         toast(isActive ? '🔔 الإشعارات مفعلة' : '🔕 الإشعارات معطلة');
     });
 
+    // تسجيل الخروج من شاشة الإعدادات
+    $('#logoutSetting')?.addEventListener('click', () => {
+        if (confirm('تسجيل الخروج؟')) {
+            localStorage.removeItem('ramzapp_user');
+            window.location.href = 'login.html';
+        }
+    });
+
+    // حذف الحساب من شاشة الإعدادات
+    $('#deleteAccountSetting')?.addEventListener('click', async () => {
+        if (confirm('⚠️ تحذير: سيتم حذف حسابك وجميع بياناتك نهائياً. هل أنت متأكد؟')) {
+            await deleteUserAccount();
+        }
+    });
+
     // ==================== بدء التشغيل ====================
     (async () => {
         const user = await getCurrentUser();
         if (!user) return;
         await renderChats();
+        await renderContacts();
         setInterval(() => { if (currentScreen === 'chats') renderChats(); }, 15000);
     })();
 </script>
