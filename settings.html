@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>الإعدادات | RamzApp</title>
+    <!-- روابط Font Awesome المزدوجة لضمان ظهور الأيقونات في كل المتصفحات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0-beta3/css/all.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* ========== متغيرات الألوان المتوافقة مع التطبيق ========== */
+        :root {
+            --bg: #0d0d0d;
+            --surface: #1a1a1a;
+            --surface2: #222;
+            --surface3: #2a2a2a;
+            --text: #fff;
+            --text2: #ddd;
+            --text3: #999;
+            --border: #2c2c2c;
+            --accent: #ff0050;
+            --accent2: #ff6b8a;
+            --green: #00a884;
+            --shadow: 0 8px 32px rgba(0,0,0,0.6);
+        }
+        .light-theme {
+            --bg: #f0f2f5;
+            --surface: #fff;
+            --surface2: #f5f5f5;
+            --surface3: #e9edef;
+            --text: #111;
+            --text2: #333;
+            --text3: #667781;
+            --border: #e0e0e0;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        body {
+            background: var(--bg);
+            font-family: 'Cairo', sans-serif;
+            color: var(--text);
+            padding-bottom: 30px;
+            transition: background 0.2s, color 0.2s;
+        }
+        /* الهيدر */
+        .header {
+            background: var(--surface);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .back-btn, .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 22px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .back-btn:active, .menu-btn:active {
+            transform: scale(0.92);
+        }
+        .header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            flex: 1;
+        }
+        /* قسم الملف الشخصي (بطاقة) */
+        .profile-card {
+            background: var(--surface);
+            margin: 12px 12px;
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid var(--border);
+        }
+        .profile-card:hover {
+            background: var(--surface2);
+        }
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--surface3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text);
+            overflow: hidden;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-info {
+            flex: 1;
+        }
+        .profile-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .profile-status {
+            font-size: 13px;
+            color: var(--text3);
+        }
+        .chevron-right {
+            color: var(--text3);
+            font-size: 18px;
+        }
+        /* قائمة الإعدادات */
+        .settings-list {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 8px;
+        }
+        .setting-section {
+            background: var(--surface);
+            margin-bottom: 12px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .setting-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            border-bottom: 1px solid var(--border);
+        }
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        .setting-item:hover {
+            background: var(--surface2);
+        }
+        .setting-icon {
+            width: 32px;
+            font-size: 22px;
+            text-align: center;
+            color: var(--green);
+        }
+        .setting-info {
+            flex: 1;
+        }
+        .setting-title {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .setting-desc {
+            font-size: 12px;
+            color: var(--text3);
+            margin-top: 2px;
+        }
+        .chevron {
+            color: var(--text3);
+            font-size: 14px;
+        }
+        /* زر التبديل (Toggle) */
+        .toggle-sw {
+            width: 48px;
+            height: 26px;
+            background: var(--border);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .toggle-sw.active {
+            background: var(--accent);
+        }
+        .toggle-sw::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            right: 2px;
+            transition: 0.3s;
+        }
+        .toggle-sw.active::after {
+            right: 24px;
+        }
+        /* قسم Meta Verified */
+        .meta-verified {
+            background: linear-gradient(135deg, var(--surface), #182229);
+            border: 1px solid #ffcc00;
+        }
+        .meta-verified .setting-icon i {
+            color: #ffcc00;
+        }
+        /* القائمة المنبثقة (ثلاث نقاط) */
+        .popup-menu {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            background: var(--surface);
+            border-radius: 16px;
+            width: 220px;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .popup-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            color: var(--text2);
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+        .popup-item:last-child {
+            border-bottom: none;
+        }
+        .popup-item:hover {
+            background: var(--surface2);
+        }
+        .popup-item.danger {
+            color: #ff4444;
+        }
+        /* تذييل */
+        .footer-note {
+            text-align: center;
+            padding: 24px;
+            font-size: 11px;
+            color: var(--text3);
+        }
+        /* رسائل التنبيه */
+        .global-toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 13px;
+            z-index: 5000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+            font-family: 'Cairo';
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <button class="back-btn" id="backBtn"><i class="fas fa-arrow-right"></i></button>
+    <h2>الإعدادات</h2>
+    <button class="menu-btn" id="menuBtn"><i class="fas fa-ellipsis-v"></i></button>
+</div>
+
+<!-- بطاقة الملف الشخصي -->
+<div class="profile-card" id="profileCard">
+    <div class="profile-avatar" id="profileAvatar"></div>
+    <div class="profile-info">
+        <div class="profile-name" id="profileName">...</div>
+        <div class="profile-status" id="profileStatus">...</div>
+    </div>
+    <div class="chevron-right"><i class="fas fa-chevron-left"></i></div>
+</div>
+
+<div class="settings-list">
+    <!-- الوضع الليلي/النهاري -->
+    <div class="setting-section">
+        <div class="setting-item" id="themeToggleItem">
+            <div class="setting-icon"><i class="fas fa-moon"></i></div>
+            <div class="setting-info">
+                <div class="setting-title">الوضع الليلي</div>
+                <div class="setting-desc">تبديل مظهر التطبيق</div>
+            </div>
+            <div class="toggle-sw" id="themeSwitch"></div>
+        </div>
+    </div>
+
+    <!-- Meta Verified -->
+    <div class="setting-section meta-verified">
+        <div class="setting-item" id="metaVerified">
+            <div class="setting-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="setting-info">
+                <div class="setting-title">Meta Verified</div>
+                <div class="setting-desc">الحصول على شارة تحقق ومزايا أخرى</div>
+            </div>
+            <div class="chevron"><i class="fas fa-chevron-left"></i></div>
+        </div>
+    </div>
+
+    <!-- الحساب -->
+    <div class="setting-section">
+        <div class="setting-item" id="accountSetting">
+            <div class="setting-icon"><i class="fas fa-user-circle"></i></div>
+            <div class="setting-info">
+                <div class="setting-title">الحساب</div>
+                <div class="setting-desc">إشعارات الأمان، تغيير الرقم</div>
+            </div>
+            <div class="chevron"><i class="fas fa-chevron-left"></i></div>
+        </div>
+    </div>
+
+    <!-- الخصوصية -->
+    <div class="setting-section">
+        <div class="setting-item" id="privacySetting">
+            <div class="setting-icon"><i class="fas fa-lock"></i></div>
+            <div class="setting-info">
+                <div class="setting-title">الخصوصية</div>
+                <div class="setting-desc">الحسابات المحظورة، الرسائل ذاتية الاختفاء</div>
+            </div>
+            <div class="chevron"><i class="fas fa-chevron-left"></i></div>
+        </div>
+    </div>
+
+    <!-- الدردشات -->
+    <div class="setting-section">
+        <div class="setting-item" id="chatsSetting">
+            <div class="setting-icon"><i class="fas fa-comment-dots"></i></div>
+            <div class="setting-info">
+                <div class="setting-title">الدردشات</div>
+                <div class="setting-desc">السمة، خلفيات الشاشة، سجلات الدردشة</div>
+            </div>
+            <div class="chevron"><i class="fas fa-chevron-left"></i></div>
+        </div>
+    </div>
+
+    <!-- الإشعارات -->
+    <div class="setting-section">
+        <div class="setting-item" id="notifSetting">
+            <div class="setting-icon"><i class="fas fa-bell"></i></div>
+            <div class="setting-info">
+                <div class="setting-title">الإشعارات</div>
+                <div class="setting-desc">نغمات الرسالة والمجموعة والمكالمة</div>
+            </div>
+            <div class="chevron"><i class="fas fa-chevron-left"></i></div>
+        </div>
+    </div>
+
+    <!-- التخزين والبيانات -->
+    <div class="setting-section">
+        <div class="setting-item" id="storageSetting">
+            <div class="setting-icon"><i class="fas fa-database"></i></div>
+            <div class="setting-info">
+                <div class="setting-title">التخزين والبيانات</div>
+                <div class="setting-desc">استعمال الشبكة، التنزيل التلقائي</div>
+            </div>
+            <div class="chevron"><i class="fas fa-chevron-left"></i></div>
+        </div>
+    </div>
+
+    <!-- لغة التطبيق -->
+    <div class="setting-section">
+        <div class="setting-item" id="languageSetting">
+            <div class="setting-icon"><i class="fas fa-language"></i></div>
+            <div class="setting-info">
+                <div class="setting-title">لغة التطبيق</div>
+                <div class="setting-desc">العربية</div>
+            </div>
+            <div class="chevron"><i class="fas fa-chevron-left"></i></div>
+        </div>
+    </div>
+
+    <!-- المساعدة والملاحظات -->
+    <div class="setting-section">
+        <div class="setting-item" id="helpSetting">
+            <div class="setting-icon"><i class="fas fa-question-circle"></i></div>
+            <div class="setting-info">
+                <div class="setting-title">المساعدة والملاحظات</div>
+                <div class="setting-desc">مركز المساعدة، اتصل بنا، سياسة الخصوصية</div>
+            </div>
+            <div class="chevron"><i class="fas fa-chevron-left"></i></div>
+        </div>
+    </div>
+
+    <!-- دعوة جهة اتصال -->
+    <div class="setting-section">
+        <div class="setting-item" id="inviteSetting">
+            <div class="setting-icon"><i class="fas fa-user-plus"></i></div>
+            <div class="setting-info">
+                <div class="setting-title">دعوة جهة اتصال</div>
+                <div class="setting-desc">مشاركة رابط التحميل مع الأصدقاء</div>
+            </div>
+            <div class="chevron"><i class="fas fa-chevron-left"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="footer-note">
+    © 2026 RamzApp | المطور: رمزي الصلاحي
+</div>
+
+<script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    
+    // ========== تكوين Supabase ==========
+    const SUPABASE_URL = 'https://serlegwdzjulfcxabxzv.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_4_c97KxnG_7HTvfv-pKeNQ_FTlnK6Yx';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ========== دوال مساعدة ==========
+    function toast(msg, duration = 2000) {
+        const existing = document.querySelector('.global-toast');
+        if (existing) existing.remove();
+        const el = document.createElement('div');
+        el.className = 'global-toast';
+        el.textContent = msg;
+        document.body.appendChild(el);
+        requestAnimationFrame(() => el.style.opacity = '1');
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, duration);
+    }
+
+    async function getCurrentUser() {
+        const raw = localStorage.getItem('ramzapp_user');
+        if (!raw) { window.location.href = 'login.html'; return null; }
+        return JSON.parse(raw);
+    }
+
+    async function signOut() {
+        await supabase.auth.signOut();
+        localStorage.removeItem('ramzapp_user');
+        window.location.href = 'login.html';
+    }
+
+    async function deleteAccount() {
+        const user = await getCurrentUser();
+        if (!user) return;
+        if (confirm('⚠️ تحذير: سيتم حذف حسابك وجميع بياناتك نهائياً. هل أنت متأكد؟')) {
+            await supabase.from('users').delete().eq('id', user.id);
+            await supabase.auth.signOut();
+            localStorage.removeItem('ramzapp_user');
+            toast('✅ تم حذف الحساب');
+            window.location.href = 'login.html';
+        }
+    }
+
+    function loadTheme() {
+        const theme = localStorage.getItem('ramzapp_theme') || 'dark';
+        document.body.classList.toggle('light-theme', theme === 'light');
+        const themeSwitch = document.getElementById('themeSwitch');
+        if (themeSwitch) themeSwitch.classList.toggle('active', theme === 'dark');
+    }
+
+    function toggleTheme() {
+        const isLight = document.body.classList.toggle('light-theme');
+        const newTheme = isLight ? 'light' : 'dark';
+        localStorage.setItem('ramzapp_theme', newTheme);
+        const themeSwitch = document.getElementById('themeSwitch');
+        if (themeSwitch) themeSwitch.classList.toggle('active', !isLight);
+        toast(isLight ? '☀️ الوضع النهاري' : '🌙 الوضع الليلي');
+    }
+
+    // ========== تحميل بيانات المستخدم من Supabase ==========
+    async function loadUserProfile() {
+        const user = await getCurrentUser();
+        if (!user) return;
+        const { data, error } = await supabase
+            .from('users')
+            .select('name, avatar, bio')
+            .eq('id', user.id)
+            .single();
+        if (data) {
+            document.getElementById('profileName').innerText = data.name || user.name || 'مستخدم';
+            document.getElementById('profileStatus').innerText = data.bio || 'مرحباً! أنا أستخدم RamzApp';
+            if (data.avatar) {
+                document.getElementById('profileAvatar').innerHTML = `<img src="${data.avatar}" alt="avatar">`;
+            } else {
+                document.getElementById('profileAvatar').innerText = (data.name || user.name || 'م').charAt(0);
+                document.getElementById('profileAvatar').style.fontSize = '28px';
+            }
+        } else {
+            document.getElementById('profileName').innerText = user.name || 'مستخدم';
+            document.getElementById('profileStatus').innerText = 'مرحباً! أنا أستخدم RamzApp';
+            document.getElementById('profileAvatar').innerText = (user.name || 'م').charAt(0);
+            document.getElementById('profileAvatar').style.fontSize = '28px';
+        }
+    }
+
+    // ========== القائمة المنبثقة (ثلاث نقاط) ==========
+    function showPopupMenu() {
+        const existing = document.querySelector('.popup-menu');
+        if (existing) existing.remove();
+        const menu = document.createElement('div');
+        menu.className = 'popup-menu';
+        menu.innerHTML = `
+            <div class="popup-item" data-action="home"><i class="fas fa-home"></i> الرئيسية</div>
+            <div class="popup-item" data-action="profile"><i class="fas fa-user-edit"></i> تعديل الملف الشخصي</div>
+            <div class="popup-item" data-action="about"><i class="fas fa-info-circle"></i> حول التطبيق</div>
+            <div class="popup-item danger" data-action="logout"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</div>
+            <div class="popup-item danger" data-action="delete"><i class="fas fa-trash-alt"></i> حذف الحساب</div>
+        `;
+        document.body.appendChild(menu);
+        const closeMenu = () => menu.remove();
+        menu.querySelectorAll('.popup-item').forEach(item => {
+            item.addEventListener('click', async () => {
+                const action = item.dataset.action;
+                if (action === 'home') window.location.href = 'chats.html';
+                else if (action === 'profile') window.location.href = 'edit-profile.html';
+                else if (action === 'about') alert('RamzApp - الإصدار 3.0\nالمطور: رمزي الصلاحي\nجميع الحقوق محفوظة © 2026');
+                else if (action === 'logout') await signOut();
+                else if (action === 'delete') await deleteAccount();
+                closeMenu();
+            });
+        });
+        setTimeout(() => { document.addEventListener('click', closeMenu, { once: true }); }, 10);
+    }
+
+    // ========== ربط أحداث الإعدادات ==========
+    function bindSettingsEvents() {
+        document.getElementById('themeToggleItem')?.addEventListener('click', toggleTheme);
+        document.getElementById('metaVerified')?.addEventListener('click', () => toast('⭐ طلب التحقق (Meta Verified) - قريباً'));
+        document.getElementById('accountSetting')?.addEventListener('click', () => toast('🔧 إعدادات الحساب - قريباً'));
+        document.getElementById('privacySetting')?.addEventListener('click', () => toast('🔒 إعدادات الخصوصية - قريباً'));
+        document.getElementById('chatsSetting')?.addEventListener('click', () => toast('💬 إعدادات الدردشات - قريباً'));
+        document.getElementById('notifSetting')?.addEventListener('click', () => toast('🔔 إعدادات الإشعارات - قريباً'));
+        document.getElementById('storageSetting')?.addEventListener('click', () => toast('💾 إدارة التخزين - قريباً'));
+        document.getElementById('languageSetting')?.addEventListener('click', () => toast('🌐 سيتم إضافة لغات أخرى قريباً'));
+        document.getElementById('helpSetting')?.addEventListener('click', () => toast('📞 مركز المساعدة - سيتوفر قريباً'));
+        document.getElementById('inviteSetting')?.addEventListener('click', async () => {
+            const user = await getCurrentUser();
+            if (user) {
+                const link = `${location.origin}/redirect.html?id=${user.id}`;
+                if (navigator.share) navigator.share({ title: 'RamzApp', text: `انضم إلي على RamzApp: ${link}` });
+                else navigator.clipboard.writeText(link).then(() => toast('📋 تم نسخ رابط الدعوة'));
+            } else toast('⚠️ يجب تسجيل الدخول أولاً');
+        });
+    }
+
+    // ========== الأحداث الرئيسية ==========
+    document.getElementById('backBtn')?.addEventListener('click', () => {
+        window.location.href = 'chats.html';
+    });
+    document.getElementById('menuBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showPopupMenu();
+    });
+    document.getElementById('profileCard')?.addEventListener('click', () => {
+        window.location.href = 'edit-profile.html';
+    });
+
+    // ========== بدء التشغيل ==========
+    (async () => {
+        await loadUserProfile();
+        loadTheme();
+        bindSettingsEvents();
+    })();
+</script>
+</body>
+  </html>
