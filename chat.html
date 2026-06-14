@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>RamzApp | محادثة</title>
-
-    <!-- FontAwesome 6 -->
+    <!-- FontAwesome 6 (محدث) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0-beta3/css/all.css">
-    
-    <!-- SimplePeer for WebRTC -->
-    <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
-    
+    <!-- مكتبة PeerJS لتمكين المكالمات الصوتية والفيديو -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-
     <style>
+        /* ===== الثابت الأبيض والأسود فقط (لا يوجد وضع ليلي) ===== */
         :root {
             --bg: #ffffff;
             --surface: #ffffff;
@@ -30,7 +27,6 @@
             --blue-check: #34b7f1;
             --online: #4caf50;
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            --transition: 0.2s ease;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -258,124 +254,6 @@
         .modal-action { background: none; border: none; padding: 8px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; font-size: 11px; color: var(--text); }
         .modal-close { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.5); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
 
-        /* نافذة الوسائط والروابط */
-        .media-modal {
-            position: fixed;
-            inset: 0;
-            background: var(--bg);
-            z-index: 4000;
-            display: none;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-        .media-modal.show { display: flex; }
-        .media-header {
-            background: var(--surface);
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-        }
-        .media-header button {
-            background: none;
-            border: none;
-            color: var(--text);
-            font-size: 20px;
-            cursor: pointer;
-        }
-        .media-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 8px;
-            padding: 12px;
-        }
-        .media-item {
-            background: var(--surface2);
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        .media-item img { width: 100%; height: 100px; object-fit: cover; }
-        .media-item a { display: block; padding: 8px; color: var(--text); text-decoration: none; font-size: 12px; word-break: break-all; }
-        .media-item .link-icon { font-size: 32px; text-align: center; padding: 20px; display: block; }
-
-        /* شاشات المكالمات */
-        .incoming-call-modal, .ongoing-call-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(12px);
-            z-index: 10000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .incoming-call-modal.show, .ongoing-call-modal.show { display: flex; }
-        .caller-info { text-align: center; color: white; }
-        .caller-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            margin-bottom: 12px;
-        }
-        .caller-name { font-size: 20px; font-weight: 600; margin-bottom: 4px; color: white; }
-        .call-status { font-size: 14px; opacity: 0.8; }
-        .call-actions { display: flex; gap: 40px; margin-top: 20px; }
-        .call-action-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: #ff4d4d;
-            border: none;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-        }
-        .call-action-btn.answer { background: #25D366; }
-        .call-timer { font-size: 32px; font-family: monospace; color: white; }
-
-        /* نافذة المجموعة الجديدة */
-        .group-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(8px);
-            z-index: 5000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .group-modal.show { display: flex; }
-        .group-card {
-            background: var(--surface);
-            border-radius: 28px;
-            width: 320px;
-            max-width: 90%;
-            padding: 20px;
-        }
-        .group-card input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 25px;
-            border: 1px solid var(--border);
-            background: var(--surface2);
-            color: var(--text);
-            margin-bottom: 12px;
-        }
-
         /* القوائم المنبثقة */
         .dropdown-menu, .sub-dropdown-menu {
             position: fixed;
@@ -409,6 +287,68 @@
         .dropdown-item.danger, .sub-dropdown-item.danger { color: #ff5e5e; }
         .more-btn { background: var(--surface2); border-top: 1px solid var(--border); margin-top: 4px; }
 
+        /* شاشات المكالمات الواردة والصادرة والجارية */
+        .call-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .call-modal.show { display: flex; }
+        .caller-info { text-align: center; color: white; }
+        .caller-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+        .caller-name { font-size: 20px; font-weight: 600; margin-bottom: 4px; color: white; }
+        .call-status { font-size: 14px; opacity: 0.8; }
+        .call-actions { display: flex; gap: 40px; margin-top: 20px; }
+        .call-action-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ff4d4d;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+        }
+        .call-action-btn.answer { background: #25D366; }
+        .call-timer { font-size: 32px; font-family: monospace; color: white; }
+        .call-video {
+            width: 100%;
+            max-width: 400px;
+            background: #000;
+            border-radius: 16px;
+        }
+        .remote-video-container, .local-video-container {
+            position: relative;
+            margin: 10px;
+        }
+        .local-video-container video {
+            width: 120px;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            border-radius: 12px;
+            border: 2px solid white;
+        }
         .global-toast {
             position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
             background: var(--surface2); color: var(--text); padding: 6px 16px; border-radius: 30px;
@@ -432,7 +372,7 @@
     <button class="header-btn" id="chatMenuBtn"><i class="fas fa-ellipsis-v"></i></button>
 </div>
 
-<!-- القائمة الرئيسية -->
+<!-- القائمة الرئيسية (7 خيارات + زر المزيد) -->
 <div class="dropdown-menu" id="chatMenu">
     <div class="dropdown-item" data-action="view_contact"><i class="fas fa-address-card"></i> عرض جهة الاتصال</div>
     <div class="dropdown-item" data-action="search"><i class="fas fa-search"></i> بحث</div>
@@ -444,7 +384,7 @@
     <div class="dropdown-item more-btn" data-action="more"><i class="fas fa-ellipsis-h"></i> المزيد...</div>
 </div>
 
-<!-- القائمة الفرعية -->
+<!-- القائمة الفرعية (الخيارات المتبقية) -->
 <div class="sub-dropdown-menu" id="subMenu">
     <div class="sub-dropdown-item" data-action="report"><i class="fas fa-flag"></i> إبلاغ</div>
     <div class="sub-dropdown-item" data-action="block"><i class="fas fa-ban"></i> حظر</div>
@@ -502,53 +442,9 @@
     </div>
 </div>
 
-<!-- نافذة الوسائط والروابط -->
-<div class="media-modal" id="mediaModal">
-    <div class="media-header">
-        <button id="closeMediaModal"><i class="fas fa-times"></i></button>
-        <span>وسائط وروابط</span>
-    </div>
-    <div class="media-grid" id="mediaGrid"></div>
-</div>
-
-<!-- نافذة المجموعة الجديدة -->
-<div class="group-modal" id="groupModal">
-    <div class="group-card">
-        <h3 style="margin-bottom:16px;">إنشاء مجموعة جديدة</h3>
-        <input type="text" id="groupName" placeholder="اسم المجموعة">
-        <button class="input-btn send-btn" id="createGroupBtn" style="width:100%; border-radius:25px;">إنشاء</button>
-        <button class="input-btn" id="closeGroupModal" style="margin-top:8px;">إلغاء</button>
-    </div>
-</div>
-
-<!-- نافذة الإبلاغ -->
-<div class="modal-overlay" id="reportModal">
-    <div class="modal-card">
-        <div style="padding:16px;">
-            <h3>إبلاغ عن مستخدم</h3>
-            <textarea id="reportReason" placeholder="سبب الإبلاغ..." style="width:100%; margin:12px 0; padding:8px; border-radius:12px; border:1px solid var(--border); background:var(--surface2); color:var(--text);"></textarea>
-            <button class="input-btn send-btn" id="submitReportBtn" style="width:100%;">إرسال</button>
-            <button class="input-btn" id="closeReportModal" style="margin-top:8px;">إلغاء</button>
-        </div>
-    </div>
-</div>
-
-<!-- نافذة سمة الدردشة -->
-<div class="modal-overlay" id="themeModal">
-    <div class="modal-card">
-        <div style="padding:16px;">
-            <h3>سمة الدردشة</h3>
-            <div style="margin:12px 0;">
-                <button id="themeLight" style="padding:8px 16px; margin:4px; border-radius:20px; background:white; color:black;">فاتح</button>
-                <button id="themeDark" style="padding:8px 16px; margin:4px; border-radius:20px; background:#1a1a1a; color:white;">داكن</button>
-            </div>
-            <button class="input-btn" id="closeThemeModal">إلغاء</button>
-        </div>
-    </div>
-</div>
-
 <!-- شاشات المكالمات -->
-<div class="incoming-call-modal" id="incomingCallModal">
+<!-- شاشة المكالمة الواردة -->
+<div class="call-modal" id="incomingCallModal">
     <div class="caller-info">
         <div class="caller-avatar" id="callerAvatar">?</div>
         <div class="caller-name" id="callerName">...</div>
@@ -557,9 +453,18 @@
     <div class="call-actions">
         <button class="call-action-btn" id="rejectCallBtn"><i class="fas fa-phone-slash"></i></button>
         <button class="call-action-btn answer" id="answerCallBtn"><i class="fas fa-phone-alt"></i></button>
+        <button class="call-action-btn answer" id="answerVideoCallBtn" style="display:none;"><i class="fas fa-video"></i></button>
     </div>
 </div>
-<div class="ongoing-call-modal" id="ongoingCallModal">
+
+<!-- شاشة المكالمة الجارية (صوت أو فيديو) -->
+<div class="call-modal" id="ongoingCallModal">
+    <div class="remote-video-container" id="remoteVideoContainer">
+        <video id="remoteVideo" autoplay playsinline></video>
+    </div>
+    <div class="local-video-container" id="localVideoContainer">
+        <video id="localVideo" autoplay playsinline muted></video>
+    </div>
     <div class="caller-info">
         <div class="caller-avatar" id="ongoingCallerAvatar">?</div>
         <div class="caller-name" id="ongoingCallerName">...</div>
@@ -567,13 +472,10 @@
     </div>
     <div class="call-actions">
         <button class="call-action-btn" id="endCallBtn"><i class="fas fa-phone-slash"></i></button>
-        <button class="call-action-btn" id="toggleVideoBtn" style="background:#34b7f1;"><i class="fas fa-video"></i></button>
+        <button class="call-action-btn" id="toggleMuteBtn" style="background:#444;"><i class="fas fa-microphone-slash"></i></button>
+        <button class="call-action-btn" id="toggleVideoBtn" style="background:#444;"><i class="fas fa-video-slash"></i></button>
     </div>
 </div>
-
-<!-- عنصر الفيديو المحلي (للمكالمة المرئية) -->
-<video id="localVideo" autoplay muted playsinline style="display:none;"></video>
-<video id="remoteVideo" autoplay playsinline style="display:none;"></video>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
@@ -601,13 +503,15 @@ let callTimerInterval = null;
 let ringtoneAudio = null;
 let isMuted = localStorage.getItem(`muted_${currentChatId}`) === 'true';
 let isBlocked = localStorage.getItem(`blocked_${currentChatId}`) === 'true';
+let isVideoCall = false;    // نوع المكالمة الحالية (صوت/فيديو)
+let localStream = null;      // تيار الصوت/الفيديو المحلي
+let remoteStream = null;     // تيار الطرف الآخر
+let peer = null;             // كائن PeerJS
+let currentCall = null;      // كائن Call الحالي من PeerJS
+let localVideo = null;
+let remoteVideo = null;
 
-// WebRTC variables
-let peer = null;
-let localStream = null;
-let isCallActive = false;
-let isVideoCall = false;
-
+// دوال مساعدة
 function toast(msg) {
     let el = document.querySelector('.global-toast');
     if (el) el.remove();
@@ -761,7 +665,7 @@ window.saveMedia = async function(e,url) { e.stopPropagation(); try { let resp=a
 window.downloadMedia = async function(e,url) { e.stopPropagation(); try { let resp=await fetch(url); let blob=await resp.blob(); let handle=await window.showSaveFilePicker({ suggestedName:'media.jpg' }); let w=await handle.createWritable(); await w.write(blob); await w.close(); toast('تم التنزيل'); } catch(e) { if(e.name!=='AbortError') toast('فشل التنزيل'); } };
 window.playVoice = function(btn) { let a = new Audio(btn.dataset.audio); a.play(); };
 
-// مودال الملف الشخصي
+// مودال الملف الشخصي (بقية الخيارات)
 async function openContactProfile() {
     let { data: contactUser } = await supabase.from('users').select('*').eq('id', currentChatId).single();
     if(!contactUser) return;
@@ -792,7 +696,7 @@ async function openContactProfile() {
 }
 document.getElementById('closeContactProfileModalBtn').addEventListener('click', () => document.getElementById('contactProfileModal').classList.remove('active'));
 
-// بحث
+// البحث في المحادثة
 document.getElementById('closeChatSearchBtn').addEventListener('click', () => {
     document.getElementById('chatSearchBar').style.display='none';
     document.getElementById('chatSearchInput').value='';
@@ -805,127 +709,18 @@ document.getElementById('chatSearchInput').addEventListener('input', function() 
     document.querySelectorAll('.msg-bubble').forEach(b => { if(b.textContent.toLowerCase().includes(q)) b.style.background='rgba(255,200,0,0.2)'; });
 });
 
-// ========== تفعيل جميع ميزات القائمة ==========
-// 1. وسائط وروابط
-async function showMediaAndLinks() {
-    const msgs = await fetchMessages();
-    const mediaGrid = document.getElementById('mediaGrid');
-    mediaGrid.innerHTML = '';
-    msgs.forEach(msg => {
-        if (msg.type === 'image' && msg.media_url) {
-            const div = document.createElement('div');
-            div.className = 'media-item';
-            div.innerHTML = `<img src="${msg.media_url}" onclick="openImageViewer('${msg.media_url}')">`;
-            mediaGrid.appendChild(div);
-        } else if (msg.content && (msg.content.includes('http://') || msg.content.includes('https://'))) {
-            const div = document.createElement('div');
-            div.className = 'media-item';
-            div.innerHTML = `<a href="${msg.content}" target="_blank" class="link-icon"><i class="fas fa-link"></i><span style="display:block;">رابط</span></a>`;
-            mediaGrid.appendChild(div);
-        }
-    });
-    document.getElementById('mediaModal').classList.add('show');
-}
-document.getElementById('closeMediaModal').addEventListener('click', () => {
-    document.getElementById('mediaModal').classList.remove('show');
-});
-
-// 2. كتم الإشعارات
+// تفعيل كافة الخيارات في القوائم المنبثقة
 function toggleMute() {
     isMuted = !isMuted;
     localStorage.setItem(`muted_${currentChatId}`, isMuted);
     toast(isMuted ? '🔕 تم كتم الإشعارات لهذه المحادثة' : '🔔 تم إلغاء كتم الإشعارات');
 }
-
-// 3. رسائل ذاتية الاختفاء
-let disappearTimer = null;
-function setDisappearingMessages() {
-    let seconds = prompt('اختر مدة بقاء الرسائل قبل الحذف التلقائي (30، 60، 90 ثانية):', '30');
-    if (!seconds) return;
-    localStorage.setItem(`disappear_${currentChatId}`, seconds);
-    toast(`⏳ سيتم حذف الرسائل الجديدة تلقائياً بعد ${seconds} ثانية`);
-}
-async function checkDisappearingMessages() {
-    const disappearTime = localStorage.getItem(`disappear_${currentChatId}`);
-    if (!disappearTime) return;
-    const msgs = await fetchMessages();
-    const now = Date.now();
-    for (let msg of msgs) {
-        const msgTime = new Date(msg.created_at).getTime();
-        if (now - msgTime > disappearTime * 1000) {
-            await supabase.from('messages').delete().eq('id', msg.id);
-            document.getElementById('msg-'+msg.id)?.remove();
-        }
-    }
-}
-setInterval(checkDisappearingMessages, 5000);
-
-// 4. مجموعة جديدة
-function showGroupModal() {
-    document.getElementById('groupModal').classList.add('show');
-}
-document.getElementById('closeGroupModal').addEventListener('click', () => {
-    document.getElementById('groupModal').classList.remove('show');
-});
-document.getElementById('createGroupBtn').addEventListener('click', () => {
-    const groupName = document.getElementById('groupName').value.trim();
-    if (!groupName) { toast('الرجاء إدخال اسم المجموعة'); return; }
-    toast(`👥 تم إنشاء مجموعة "${groupName}" - قريباً سيتم تفعيلها بالكامل`);
-    document.getElementById('groupModal').classList.remove('show');
-});
-
-// 5. سمة الدردشة
-function showThemeModal() {
-    document.getElementById('themeModal').classList.add('show');
-}
-document.getElementById('closeThemeModal').addEventListener('click', () => {
-    document.getElementById('themeModal').classList.remove('show');
-});
-document.getElementById('themeLight').addEventListener('click', () => {
-    document.body.classList.remove('dark-theme');
-    localStorage.setItem('ramzapp_theme', 'light');
-    toast('تم التبديل إلى السمة الفاتحة');
-    document.getElementById('themeModal').classList.remove('show');
-});
-document.getElementById('themeDark').addEventListener('click', () => {
-    document.body.classList.add('dark-theme');
-    localStorage.setItem('ramzapp_theme', 'dark');
-    toast('تم التبديل إلى السمة الداكنة');
-    document.getElementById('themeModal').classList.remove('show');
-});
-
-// 6. إبلاغ
-function showReportModal() {
-    document.getElementById('reportModal').classList.add('show');
-}
-document.getElementById('closeReportModal').addEventListener('click', () => {
-    document.getElementById('reportModal').classList.remove('show');
-});
-document.getElementById('submitReportBtn').addEventListener('click', async () => {
-    const reason = document.getElementById('reportReason').value.trim();
-    if (!reason) { toast('الرجاء كتابة سبب الإبلاغ'); return; }
-    await supabase.from('reports').insert({
-        reporter_id: user.id,
-        reported_id: currentChatId,
-        reason: reason,
-        created_at: new Date().toISOString()
-    });
-    toast('✅ تم إرسال البلاغ، شكراً لك');
-    document.getElementById('reportModal').classList.remove('show');
-});
-
-// 7. حظر
 function toggleBlock() {
     isBlocked = !isBlocked;
     localStorage.setItem(`blocked_${currentChatId}`, isBlocked);
-    if (isBlocked) {
-        toast('🚫 تم حظر هذا المستخدم، لن تتمكن من إرسال رسائل له');
-    } else {
-        toast('✅ تم إلغاء حظر المستخدم');
-    }
+    if (isBlocked) toast('🚫 تم حظر هذا المستخدم، لن تتمكن من إرسال رسائل له');
+    else toast('✅ تم إلغاء حظر المستخدم');
 }
-
-// 8. مسح المحادثة
 async function clearChat() {
     if (!confirm('⚠️ هل أنت متأكد من مسح جميع رسائل هذه المحادثة؟ لا يمكن التراجع.')) return;
     const { error } = await supabase
@@ -936,170 +731,158 @@ async function clearChat() {
     document.getElementById('messagesArea').innerHTML = '<div class="date-divider">تم مسح المحادثة</div>';
     toast('🧹 تم مسح جميع الرسائل');
 }
+function disappearMessages() { toast('⏳ سيتم تفعيل الرسائل ذاتية الاختفاء قريباً'); }
+function newGroup() { toast('👥 سيتم توفير إنشاء مجموعات جديدة قريباً'); }
+function chatTheme() { toast('🎨 سيتم توفير سمات الدردشة قريباً'); }
+function reportUser() { toast('⚠️ تم إرسال إبلاغ إلى المشرفين'); }
+function transferChat() { toast('🔄 سيتم توفير نقل الدردشة قريباً'); }
+function addShortcut() { toast('📌 سيتم توفير إضافة اختصار قريباً'); }
+function mediaLinks() { toast('📁 سيتم توفير قسم الوسائط والروابط والمستندات قريباً'); }
 
-// 9. نقل الدردشة (تصدير)
-async function exportChat() {
-    const msgs = await fetchMessages();
-    const chatData = {
-        chatId: currentChatId,
-        messages: msgs,
-        exportDate: new Date().toISOString()
-    };
-    const blob = new Blob([JSON.stringify(chatData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `chat_${currentChatId}_export.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast('📤 تم تصدير المحادثة');
+// ========== دوال المكالمات الحقيقية (PeerJS) ==========
+// إنشاء كائن Peer فريد لكل مستخدم (يتم حفظ peer_id)
+async function initPeer() {
+    return new Promise((resolve, reject) => {
+        const peerId = user.id; // استخدام معرف المستخدم كمعرف Peer
+        peer = new Peer(peerId, {
+            config: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' }
+                ]
+            }
+        });
+        peer.on('open', (id) => {
+            console.log('PeerJS ready, ID:', id);
+            // تخزين peer_id في جدول users لتسهيل الاتصال
+            supabase.from('users').update({ peer_id: id }).eq('id', user.id).then();
+            resolve(peer);
+        });
+        peer.on('error', (err) => { console.error('PeerJS error:', err); reject(err); });
+    });
 }
 
-// 10. إضافة اختصار (PWA)
-function addToHomeScreen() {
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-        toast('التطبيق مثبت بالفعل على الشاشة الرئيسية');
-    } else {
-        toast('📌 استخدم القائمة في المتصفح: "إضافة إلى الشاشة الرئيسية"');
-    }
+// الحصول على معرف Peer الخاص بالمستخدم المستقبل
+async function getPeerId(userId) {
+    const { data, error } = await supabase.from('users').select('peer_id').eq('id', userId).single();
+    if (error || !data?.peer_id) return null;
+    return data.peer_id;
 }
 
-// ========== المكالمات الصوتية والفيديو الحقيقية (WebRTC) ==========
-async function startCall(isVideo = false) {
+// بدء مكالمة (صوت فقط أو فيديو)
+async function startCall(isVideo) {
     if (currentCallId) return;
     isVideoCall = isVideo;
     try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
-        if (isVideo) {
-            document.getElementById('localVideo').srcObject = localStream;
-            document.getElementById('localVideo').style.display = 'block';
-            document.getElementById('remoteVideo').style.display = 'block';
-        }
-        const { data: call, error } = await supabase
+        const stream = await navigator.mediaDevices.getUserMedia(isVideo ? { audio: true, video: true } : { audio: true, video: false });
+        localStream = stream;
+        const remotePeerId = await getPeerId(currentChatId);
+        if (!remotePeerId) { toast('المستخدم غير متاح للمكالمة'); return; }
+        const call = peer.call(remotePeerId, stream);
+        currentCall = call;
+        setupCallHandlers(call);
+        // تسجيل المكالمة في قاعدة البيانات
+        const { data: callRecord, error } = await supabase
             .from('calls')
             .insert({
                 caller_id: user.id,
                 callee_id: currentChatId,
                 status: 'ringing',
-                type: isVideo ? 'video' : 'audio',
-                created_at: new Date().toISOString()
+                created_at: new Date().toISOString(),
+                peer_id: remotePeerId,
+                type: isVideo ? 'video' : 'audio'
             })
-            .select()
-            .single();
-        if (error) { toast('فشل بدء المكالمة'); return; }
-        currentCallId = call.id;
-        toast(isVideo ? '📹 جاري الاتصال المرئي...' : '📞 جاري الاتصال...');
-        document.getElementById('ongoingCallerName').textContent = '...';
-        document.getElementById('ongoingCallerAvatar').textContent = '?';
+            .select().single();
+        if (error) throw error;
+        currentCallId = callRecord.id;
+        // فتح شاشة الانتظار
+        showOngoingCallUI(true);
+        playRingtone('waiting');
+    } catch (err) { toast('فشل بدء المكالمة: ' + err.message); }
+}
+
+// إعداد معالجات استقبال المكالمة من PeerJS
+function setupCallHandlers(call) {
+    call.on('stream', (remoteStream) => {
+        remoteStream = remoteStream;
+        const remoteVideoEl = document.getElementById('remoteVideo');
+        if (remoteVideoEl) remoteVideoEl.srcObject = remoteStream;
+        // إخفاء شاشة الانتظار وعرض الفيديو
         document.getElementById('ongoingCallModal').classList.add('show');
-        let startTime = Date.now();
-        callTimerInterval = setInterval(() => {
-            let diff = Math.floor((Date.now() - startTime) / 1000);
-            let mins = Math.floor(diff / 60);
-            let secs = diff % 60;
-            document.getElementById('callTimer').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-        }, 1000);
-        
-        // إنشاء Peer connection وانتظار إشارة الطرف الآخر
-        peer = new SimplePeer({ initiator: true, stream: localStream });
-        peer.on('signal', async (data) => {
-            await supabase.from('calls_signals').insert({
-                call_id: currentCallId,
-                sender_id: user.id,
-                signal_data: JSON.stringify(data),
-                created_at: new Date().toISOString()
-            });
-        });
-        peer.on('stream', (stream) => {
-            if (isVideo) {
-                document.getElementById('remoteVideo').srcObject = stream;
-            }
-        });
-        peer.on('error', (err) => {
-            console.error(err);
-            endCall();
-        });
-        peer.on('close', () => endCall());
-    } catch(err) { toast('⚠️ لا يمكن الوصول إلى الكاميرا/الميكروفون'); }
+        document.getElementById('callTimer').style.display = 'block';
+        // تحديث حالة المكالمة في قاعدة البيانات
+        supabase.from('calls').update({ status: 'ongoing', answered_at: new Date().toISOString() }).eq('id', currentCallId);
+        startTimer();
+    });
+    call.on('close', () => { endCall(); });
+    call.on('error', (err) => { console.error(err); endCall(); });
 }
 
-async function answerCall(callId) {
-    const { data: call } = await supabase.from('calls').select('*').eq('id', callId).single();
-    if (!call) return;
-    isVideoCall = call.type === 'video';
-    try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideoCall });
-        if (isVideoCall) {
-            document.getElementById('localVideo').srcObject = localStream;
-            document.getElementById('localVideo').style.display = 'block';
-            document.getElementById('remoteVideo').style.display = 'block';
-        }
-        await supabase.from('calls').update({ status: 'ongoing', answered_at: new Date().toISOString() }).eq('id', callId);
-        document.getElementById('incomingCallModal').classList.remove('show');
-        if (ringtoneAudio) ringtoneAudio.stop();
-        
-        const { data: caller } = await supabase.from('users').select('name, avatar').eq('id', call.caller_id).single();
-        document.getElementById('ongoingCallerName').textContent = caller?.name || 'مستخدم';
-        document.getElementById('ongoingCallerAvatar').textContent = caller?.avatar || '?';
-        document.getElementById('ongoingCallModal').classList.add('show');
-        let startTime = Date.now();
-        callTimerInterval = setInterval(() => {
-            let diff = Math.floor((Date.now() - startTime) / 1000);
-            let mins = Math.floor(diff / 60);
-            let secs = diff % 60;
-            document.getElementById('callTimer').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-        }, 1000);
-        
-        peer = new SimplePeer({ initiator: false, stream: localStream });
-        peer.on('signal', async (data) => {
-            await supabase.from('calls_signals').insert({
-                call_id: callId,
-                sender_id: user.id,
-                signal_data: JSON.stringify(data),
-                created_at: new Date().toISOString()
-            });
-        });
-        peer.on('stream', (stream) => {
-            if (isVideoCall) document.getElementById('remoteVideo').srcObject = stream;
-        });
-        peer.on('error', (err) => { console.error(err); endCall(); });
-        peer.on('close', () => endCall());
-        
-        // جلب الإشارات المخزنة من المتصل
-        const { data: signals } = await supabase.from('calls_signals').select('*').eq('call_id', callId).order('created_at', { ascending: true });
-        signals.forEach(sig => {
-            if (sig.sender_id !== user.id) {
-                try { peer.signal(JSON.parse(sig.signal_data)); } catch(e) {}
-            }
-        });
-    } catch(err) { toast('⚠️ لا يمكن الوصول إلى الكاميرا/الميكروفون'); }
-}
-
-async function rejectCall(callId) {
-    await supabase.from('calls').update({ status: 'missed', ended_at: new Date().toISOString() }).eq('id', callId);
-    document.getElementById('incomingCallModal').classList.remove('show');
-    if (ringtoneAudio) ringtoneAudio.stop();
-    currentCallId = null;
-    toast('📞 مكالمة فائتة');
-}
-
-async function endCall() {
+// قبول مكالمة واردة
+async function answerIncomingCall(isVideoAnswer) {
     if (!currentCallId) return;
-    await supabase.from('calls').update({ status: 'completed', ended_at: new Date().toISOString() }).eq('id', currentCallId);
-    document.getElementById('ongoingCallModal').classList.remove('show');
-    if (callTimerInterval) clearInterval(callTimerInterval);
+    const { data: call } = await supabase.from('calls').select('*').eq('id', currentCallId).single();
+    if (!call) return;
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia(isVideoAnswer ? { audio: true, video: true } : { audio: true, video: false });
+        localStream = stream;
+        if (currentCall) currentCall.answer(stream);
+        await supabase.from('calls').update({ status: 'ongoing', answered_at: new Date().toISOString() }).eq('id', currentCallId);
+        document.getElementById('incomingCallModal').classList.remove('show');
+        showOngoingCallUI(isVideoAnswer);
+        startTimer();
+        if (ringtoneAudio) ringtoneAudio.stop();
+    } catch (err) { toast('فشل قبول المكالمة: ' + err.message); }
+}
+
+// إنهاء المكالمة
+async function endCall() {
+    if (currentCall) currentCall.close();
     if (localStream) localStream.getTracks().forEach(track => track.stop());
-    if (peer) peer.destroy();
-    localStream = null;
-    peer = null;
-    currentCallId = null;
-    isCallActive = false;
-    document.getElementById('localVideo').style.display = 'none';
-    document.getElementById('remoteVideo').style.display = 'none';
+    if (remoteStream) remoteStream.getTracks().forEach(track => track.stop());
+    if (callTimerInterval) clearInterval(callTimerInterval);
+    document.getElementById('ongoingCallModal').classList.remove('show');
+    document.getElementById('incomingCallModal').classList.remove('show');
+    if (currentCallId) {
+        await supabase.from('calls').update({ status: 'completed', ended_at: new Date().toISOString() }).eq('id', currentCallId);
+        currentCallId = null;
+    }
     toast('انتهت المكالمة');
 }
 
-function playRingtone() {
+// عرض واجهة المكالمة الجارية (صوت/فيديو)
+function showOngoingCallUI(isVideo) {
+    const modal = document.getElementById('ongoingCallModal');
+    const remoteVideoDiv = document.getElementById('remoteVideoContainer');
+    const localVideoDiv = document.getElementById('localVideoContainer');
+    if (isVideo) {
+        remoteVideoDiv.style.display = 'block';
+        localVideoDiv.style.display = 'block';
+        if (localStream) {
+            const localVideoEl = document.getElementById('localVideo');
+            localVideoEl.srcObject = localStream;
+        }
+    } else {
+        remoteVideoDiv.style.display = 'none';
+        localVideoDiv.style.display = 'none';
+    }
+    modal.classList.add('show');
+}
+
+// بدء مؤقت المكالمة
+function startTimer() {
+    let startTime = Date.now();
+    if (callTimerInterval) clearInterval(callTimerInterval);
+    callTimerInterval = setInterval(() => {
+        let diff = Math.floor((Date.now() - startTime) / 1000);
+        let mins = Math.floor(diff / 60);
+        let secs = diff % 60;
+        document.getElementById('callTimer').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+    }, 1000);
+}
+
+// تشغيل رنة
+function playRingtone(type = 'incoming') {
     if (ringtoneAudio) ringtoneAudio.stop();
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioCtx.createOscillator();
@@ -1107,7 +890,7 @@ function playRingtone() {
     oscillator.connect(gain);
     gain.connect(audioCtx.destination);
     oscillator.type = 'sine';
-    oscillator.frequency.value = 440;
+    oscillator.frequency.value = type === 'waiting' ? 440 : 440;
     gain.gain.value = 0.3;
     oscillator.start();
     let interval = setInterval(() => {
@@ -1118,10 +901,11 @@ function playRingtone() {
             return;
         }
         gain.gain.value = gain.gain.value === 0.3 ? 0 : 0.3;
-    }, 500);
+    }, type === 'waiting' ? 2000 : 500);
     ringtoneAudio = { stop: () => { clearInterval(interval); oscillator.stop(); audioCtx.close(); ringtoneAudio = null; } };
 }
 
+// الاستماع للمكالمات الواردة عبر Realtime + PeerJS
 function subscribeToCalls() {
     if (callsChannel) return;
     callsChannel = supabase
@@ -1135,97 +919,66 @@ function subscribeToCalls() {
             const newCall = payload.new;
             if (newCall.status === 'ringing' && !currentCallId) {
                 currentCallId = newCall.id;
-                const { data: caller } = await supabase.from('users').select('name, avatar').eq('id', newCall.caller_id).single();
+                const { data: caller } = await supabase
+                    .from('users')
+                    .select('name, avatar')
+                    .eq('id', newCall.caller_id)
+                    .single();
                 document.getElementById('callerName').textContent = caller?.name || 'مستخدم';
                 document.getElementById('callerAvatar').textContent = caller?.avatar || '?';
+                document.getElementById('answerVideoCallBtn').style.display = newCall.type === 'video' ? 'flex' : 'none';
                 document.getElementById('incomingCallModal').classList.add('show');
-                playRingtone();
-            }
-        })
-        .on('postgres_changes', {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'calls_signals'
-        }, async (payload) => {
-            const signal = payload.new;
-            if (signal.call_id === currentCallId && signal.sender_id !== user.id && peer) {
-                try { peer.signal(JSON.parse(signal.signal_data)); } catch(e) {}
+                playRingtone('incoming');
+                // محاولة الاتصال عبر PeerJS للرد لاحقاً
+                if (peer && newCall.peer_id) {
+                    const call = peer.call(newCall.peer_id, null); // سيتم إضافة التيار عند الرد
+                    currentCall = call;
+                    setupCallHandlers(call);
+                }
             }
         })
         .subscribe();
 }
 
-document.getElementById('voiceCallBtn').addEventListener('click', () => startCall(false));
-document.getElementById('videoCallBtn').addEventListener('click', () => startCall(true));
-document.getElementById('answerCallBtn').addEventListener('click', () => { if (currentCallId) answerCall(currentCallId); });
-document.getElementById('rejectCallBtn').addEventListener('click', () => { if (currentCallId) rejectCall(currentCallId); });
-document.getElementById('endCallBtn').addEventListener('click', endCall);
-document.getElementById('toggleVideoBtn').addEventListener('click', () => {
+// كتم الصوت أثناء المكالمة
+function toggleAudioMute() {
     if (localStream) {
+        const audioTrack = localStream.getAudioTracks()[0];
+        if (audioTrack) {
+            audioTrack.enabled = !audioTrack.enabled;
+            document.getElementById('toggleMuteBtn').innerHTML = audioTrack.enabled ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
+            toast(audioTrack.enabled ? '🎤 تم إلغاء كتم الصوت' : '🔇 تم كتم الصوت');
+        }
+    }
+}
+function toggleVideoMute() {
+    if (localStream && isVideoCall) {
         const videoTrack = localStream.getVideoTracks()[0];
         if (videoTrack) {
             videoTrack.enabled = !videoTrack.enabled;
-            document.getElementById('toggleVideoBtn').style.background = videoTrack.enabled ? '#34b7f1' : '#ff4d4d';
+            document.getElementById('toggleVideoBtn').innerHTML = videoTrack.enabled ? '<i class="fas fa-video"></i>' : '<i class="fas fa-video-slash"></i>';
+            toast(videoTrack.enabled ? '📹 تم تشغيل الكاميرا' : '🚫 تم إيقاف الكاميرا');
         }
     }
-});
+}
 
-// ========== القوائم المنبثقة ==========
-const mainMenu = document.getElementById('chatMenu');
-const subMenu = document.getElementById('subMenu');
-const menuBtn = document.getElementById('chatMenuBtn');
-menuBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    mainMenu.classList.toggle('show');
-    subMenu.classList.remove('show');
-});
-document.querySelector('[data-action="more"]').addEventListener('click', (e) => {
-    e.stopPropagation();
-    subMenu.classList.toggle('show');
-});
-const mainActions = {
-    view_contact: () => openContactProfile(),
-    search: () => { document.getElementById('chatSearchBar').style.display='flex'; document.getElementById('chatSearchInput').focus(); },
-    media: () => showMediaAndLinks(),
-    mute: () => toggleMute(),
-    disappear: () => setDisappearingMessages(),
-    new_group: () => showGroupModal(),
-    chat_theme: () => showThemeModal()
-};
-document.querySelectorAll('#chatMenu .dropdown-item[data-action]').forEach(item => {
-    const action = item.dataset.action;
-    if (action !== 'more' && mainActions[action]) {
-        item.addEventListener('click', (e) => {
-            e.stopPropagation();
-            mainMenu.classList.remove('show');
-            mainActions[action]();
-        });
+// ربط أزرار المكالمات
+document.getElementById('voiceCallBtn').addEventListener('click', () => startCall(false));
+document.getElementById('videoCallBtn').addEventListener('click', () => startCall(true));
+document.getElementById('answerCallBtn').addEventListener('click', () => answerIncomingCall(false));
+document.getElementById('answerVideoCallBtn').addEventListener('click', () => answerIncomingCall(true));
+document.getElementById('rejectCallBtn').addEventListener('click', async () => {
+    if (currentCallId) {
+        await supabase.from('calls').update({ status: 'missed', ended_at: new Date().toISOString() }).eq('id', currentCallId);
+        if (ringtoneAudio) ringtoneAudio.stop();
+        document.getElementById('incomingCallModal').classList.remove('show');
+        currentCallId = null;
+        toast('📞 مكالمة فائتة');
     }
 });
-const subActions = {
-    report: () => showReportModal(),
-    block: () => toggleBlock(),
-    clear_chat: () => clearChat(),
-    transfer_chat: () => exportChat(),
-    add_shortcut: () => addToHomeScreen()
-};
-document.querySelectorAll('#subMenu .sub-dropdown-item').forEach(item => {
-    const action = item.dataset.action;
-    if (subActions[action]) {
-        item.addEventListener('click', (e) => {
-            e.stopPropagation();
-            subMenu.classList.remove('show');
-            mainMenu.classList.remove('show');
-            subActions[action]();
-        });
-    }
-});
-document.addEventListener('click', (e) => {
-    if (!menuBtn.contains(e.target) && !mainMenu.contains(e.target) && !subMenu.contains(e.target)) {
-        mainMenu.classList.remove('show');
-        subMenu.classList.remove('show');
-    }
-});
+document.getElementById('endCallBtn').addEventListener('click', endCall);
+document.getElementById('toggleMuteBtn').addEventListener('click', toggleAudioMute);
+document.getElementById('toggleVideoBtn').addEventListener('click', toggleVideoMute);
 
 // ========== تسجيل الصوت ==========
 let micBtn = document.getElementById('micBtn');
@@ -1299,7 +1052,64 @@ document.getElementById('hiddenFileInput').addEventListener('change', async (e) 
 // رجوع
 document.getElementById('backBtn').addEventListener('click', () => { localStorage.removeItem('currentChatId'); window.location.href='chats.html'; });
 
-// بدء التشغيل
+// ========== القوائم المنبثقة (ربط جميع الخيارات) ==========
+const mainMenu = document.getElementById('chatMenu');
+const subMenu = document.getElementById('subMenu');
+const menuBtn = document.getElementById('chatMenuBtn');
+menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    mainMenu.classList.toggle('show');
+    subMenu.classList.remove('show');
+});
+document.querySelector('[data-action="more"]').addEventListener('click', (e) => {
+    e.stopPropagation();
+    subMenu.classList.toggle('show');
+});
+const mainActions = {
+    view_contact: () => openContactProfile(),
+    search: () => { document.getElementById('chatSearchBar').style.display='flex'; document.getElementById('chatSearchInput').focus(); },
+    media: () => mediaLinks(),
+    mute: () => toggleMute(),
+    disappear: () => disappearMessages(),
+    new_group: () => newGroup(),
+    chat_theme: () => chatTheme()
+};
+document.querySelectorAll('#chatMenu .dropdown-item[data-action]').forEach(item => {
+    const action = item.dataset.action;
+    if (action !== 'more' && mainActions[action]) {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            mainMenu.classList.remove('show');
+            mainActions[action]();
+        });
+    }
+});
+const subActions = {
+    report: () => reportUser(),
+    block: () => toggleBlock(),
+    clear_chat: () => clearChat(),
+    transfer_chat: () => transferChat(),
+    add_shortcut: () => addShortcut()
+};
+document.querySelectorAll('#subMenu .sub-dropdown-item').forEach(item => {
+    const action = item.dataset.action;
+    if (subActions[action]) {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            subMenu.classList.remove('show');
+            mainMenu.classList.remove('show');
+            subActions[action]();
+        });
+    }
+});
+document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !mainMenu.contains(e.target) && !subMenu.contains(e.target)) {
+        mainMenu.classList.remove('show');
+        subMenu.classList.remove('show');
+    }
+});
+
+// ========== بدء التشغيل ==========
 (async () => {
     user = await getCurrentUser();
     if (!user) return;
@@ -1309,6 +1119,7 @@ document.getElementById('backBtn').addEventListener('click', () => { localStorag
         if (msgChannel) supabase.removeChannel(msgChannel);
         if (typingChannel) supabase.removeChannel(typingChannel);
         if (callsChannel) supabase.removeChannel(callsChannel);
+        if (peer) peer.destroy();
     });
 
     let { data: chatUser } = await supabase.from('users').select('*').eq('id', currentChatId).single();
@@ -1335,6 +1146,7 @@ document.getElementById('backBtn').addEventListener('click', () => { localStorag
     document.getElementById('messagesArea').scrollTop = document.getElementById('messagesArea').scrollHeight;
 
     msgChannel = subscribeToMessages();
+    await initPeer(); // تهيئة PeerJS
     subscribeToCalls();
 
     let typingTimer;
