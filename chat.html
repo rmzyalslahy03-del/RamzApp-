@@ -330,6 +330,70 @@
         .dropdown-item.danger, .sub-dropdown-item.danger { color: #ff5e5e; }
         .more-btn { background: var(--surface2); border-top: 1px solid var(--border); margin-top: 4px; }
 
+        /* شاشات المكالمات */
+        .incoming-call-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        .incoming-call-modal.show { display: flex; }
+        .caller-info { text-align: center; color: white; }
+        .caller-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+        .caller-name { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+        .call-status { font-size: 14px; opacity: 0.8; }
+        .call-actions { display: flex; gap: 40px; margin-top: 20px; }
+        .call-action-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ff4d4d;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .call-action-btn.answer { background: #25D366; }
+        .call-action-btn:hover { transform: scale(1.05); }
+        .ongoing-call-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #1a1a1a;
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+        .ongoing-call-modal.show { display: flex; }
+        .call-timer { font-size: 32px; font-family: monospace; color: white; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         .global-toast {
             position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
             background: var(--surface2); color: var(--text); padding: 6px 16px; border-radius: 30px;
@@ -366,7 +430,7 @@
     <div class="dropdown-item more-btn" data-action="more"><i class="fas fa-ellipsis-h"></i> المزيد...</div>
 </div>
 
-<!-- القائمة الفرعية (الخيارات المتبقية) -->
+<!-- القائمة الفرعية -->
 <div class="sub-dropdown-menu" id="subMenu">
     <div class="sub-dropdown-item" data-action="report"><i class="fas fa-flag"></i> إبلاغ</div>
     <div class="sub-dropdown-item" data-action="block"><i class="fas fa-ban"></i> حظر</div>
@@ -424,6 +488,29 @@
     </div>
 </div>
 
+<!-- شاشة المكالمة الواردة -->
+<div class="incoming-call-modal" id="incomingCallModal">
+    <div class="caller-info">
+        <div class="caller-avatar" id="callerAvatar">?</div>
+        <div class="caller-name" id="callerName">...</div>
+        <div class="call-status" id="callStatus">يجرى الاتصال...</div>
+    </div>
+    <div class="call-actions">
+        <button class="call-action-btn" id="rejectCallBtn"><i class="fas fa-phone-slash"></i></button>
+        <button class="call-action-btn answer" id="answerCallBtn"><i class="fas fa-phone-alt"></i></button>
+    </div>
+</div>
+
+<!-- شاشة المكالمة الجارية -->
+<div class="ongoing-call-modal" id="ongoingCallModal">
+    <div class="caller-info">
+        <div class="caller-avatar" id="ongoingCallerAvatar">?</div>
+        <div class="caller-name" id="ongoingCallerName">...</div>
+        <div class="call-timer" id="callTimer">00:00</div>
+    </div>
+    <button class="call-action-btn" id="endCallBtn"><i class="fas fa-phone-slash"></i></button>
+</div>
+
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
@@ -444,6 +531,10 @@ let replyTarget = null;
 let pendingImg = null;
 let typingChannel = null;
 let msgChannel = null;
+let callsChannel = null;
+let currentCallId = null;
+let callTimerInterval = null;
+let ringtoneAudio = null;
 
 function toast(msg) {
     let el = document.querySelector('.global-toast');
@@ -649,20 +740,15 @@ const mainMenu = document.getElementById('chatMenu');
 const subMenu = document.getElementById('subMenu');
 const menuBtn = document.getElementById('chatMenuBtn');
 
-// فتح/إغلاق القائمة الرئيسية
 menuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     mainMenu.classList.toggle('show');
-    subMenu.classList.remove('show'); // إغلاق الفرعية إذا كانت مفتوحة
+    subMenu.classList.remove('show');
 });
-
-// معالج زر "المزيد" لإظهار القائمة الفرعية
 document.querySelector('[data-action="more"]').addEventListener('click', (e) => {
     e.stopPropagation();
     subMenu.classList.toggle('show');
 });
-
-// معالجة خيارات القائمة الرئيسية
 const mainActions = {
     view_contact: () => openContactProfile(),
     search: () => { document.getElementById('chatSearchBar').style.display='flex'; document.getElementById('chatSearchInput').focus(); },
@@ -682,8 +768,6 @@ document.querySelectorAll('#chatMenu .dropdown-item[data-action]').forEach(item 
         });
     }
 });
-
-// معالجة خيارات القائمة الفرعية
 const subActions = {
     report: () => toast('⚠️ إبلاغ - سيتم توفيره قريباً'),
     block: () => { if(confirm('حظر هذا المستخدم؟')) toast('🚫 تم الحظر'); },
@@ -702,8 +786,6 @@ document.querySelectorAll('#subMenu .sub-dropdown-item').forEach(item => {
         });
     }
 });
-
-// إغلاق جميع القوائم عند النقر خارجها
 document.addEventListener('click', (e) => {
     if (!menuBtn.contains(e.target) && !mainMenu.contains(e.target) && !subMenu.contains(e.target)) {
         mainMenu.classList.remove('show');
@@ -747,6 +829,171 @@ async function startRecording(e) {
 }
 function stopRecording() { if (isRecording && mediaRecorder?.state === 'recording') mediaRecorder.stop(); }
 
+// ========== المكالمات الصوتية ==========
+async function startCall() {
+    if (currentCallId) return;
+    const { data: call, error } = await supabase
+        .from('calls')
+        .insert({
+            caller_id: user.id,
+            callee_id: currentChatId,
+            status: 'ringing',
+            created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+    if (error) { toast('فشل بدء المكالمة'); return; }
+    currentCallId = call.id;
+    toast('📞 جاري الاتصال...');
+    // افتح شاشة الانتظار (اختياري)
+    document.getElementById('ongoingCallerName').textContent = '...';
+    document.getElementById('ongoingCallerAvatar').textContent = '?';
+    document.getElementById('ongoingCallModal').classList.add('show');
+    // بدء مؤقت انتظار
+    let startTime = Date.now();
+    callTimerInterval = setInterval(() => {
+        let diff = Math.floor((Date.now() - startTime) / 1000);
+        let mins = Math.floor(diff / 60);
+        let secs = diff % 60;
+        document.getElementById('callTimer').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+    }, 1000);
+}
+
+async function answerCall(callId) {
+    const { error } = await supabase
+        .from('calls')
+        .update({ status: 'ongoing', answered_at: new Date().toISOString() })
+        .eq('id', callId);
+    if (error) return;
+    document.getElementById('incomingCallModal').classList.remove('show');
+    if (ringtoneAudio) ringtoneAudio.stop();
+    // فتح شاشة المكالمة الجارية
+    const { data: call } = await supabase.from('calls').select('*, users!caller_id(name, avatar)').eq('id', callId).single();
+    if (call) {
+        const otherUser = call.caller_id === user.id ? { name: call.users?.name, avatar: call.users?.avatar } : { name: 'مستخدم', avatar: '?' };
+        document.getElementById('ongoingCallerName').textContent = otherUser.name || 'مستخدم';
+        document.getElementById('ongoingCallerAvatar').textContent = otherUser.avatar || '?';
+        document.getElementById('ongoingCallModal').classList.add('show');
+        let startTime = Date.now();
+        if (callTimerInterval) clearInterval(callTimerInterval);
+        callTimerInterval = setInterval(() => {
+            let diff = Math.floor((Date.now() - startTime) / 1000);
+            let mins = Math.floor(diff / 60);
+            let secs = diff % 60;
+            document.getElementById('callTimer').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+        }, 1000);
+    }
+}
+
+async function rejectCall(callId) {
+    const { error } = await supabase
+        .from('calls')
+        .update({ status: 'missed', ended_at: new Date().toISOString() })
+        .eq('id', callId);
+    if (error) return;
+    document.getElementById('incomingCallModal').classList.remove('show');
+    if (ringtoneAudio) ringtoneAudio.stop();
+    currentCallId = null;
+    toast('📞 مكالمة فائتة');
+}
+
+async function endCall() {
+    if (!currentCallId) return;
+    await supabase
+        .from('calls')
+        .update({ status: 'completed', ended_at: new Date().toISOString() })
+        .eq('id', currentCallId);
+    document.getElementById('ongoingCallModal').classList.remove('show');
+    if (callTimerInterval) clearInterval(callTimerInterval);
+    currentCallId = null;
+    toast('انتهت المكالمة');
+}
+
+function playRingtone() {
+    if (ringtoneAudio) {
+        ringtoneAudio.pause();
+        ringtoneAudio = null;
+    }
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    oscillator.connect(gain);
+    gain.connect(audioCtx.destination);
+    oscillator.type = 'sine';
+    oscillator.frequency.value = 440;
+    gain.gain.value = 0.3;
+    oscillator.start();
+    let interval = setInterval(() => {
+        if (!ringtoneAudio) {
+            clearInterval(interval);
+            oscillator.stop();
+            audioCtx.close();
+            return;
+        }
+        gain.gain.value = gain.gain.value === 0.3 ? 0 : 0.3;
+    }, 500);
+    ringtoneAudio = { stop: () => { clearInterval(interval); oscillator.stop(); audioCtx.close(); ringtoneAudio = null; } };
+}
+
+function subscribeToCalls() {
+    if (callsChannel) return;
+    callsChannel = supabase
+        .channel('calls-' + user.id)
+        .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'calls',
+            filter: `callee_id=eq.${user.id}`
+        }, async (payload) => {
+            const newCall = payload.new;
+            if (newCall.status === 'ringing' && !currentCallId) {
+                currentCallId = newCall.id;
+                const { data: caller } = await supabase
+                    .from('users')
+                    .select('name, avatar')
+                    .eq('id', newCall.caller_id)
+                    .single();
+                document.getElementById('callerName').textContent = caller?.name || 'مستخدم';
+                document.getElementById('callerAvatar').textContent = caller?.avatar || '?';
+                document.getElementById('incomingCallModal').classList.add('show');
+                playRingtone();
+            }
+        })
+        .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'calls'
+        }, async (payload) => {
+            const updated = payload.new;
+            if (updated.id === currentCallId && updated.status === 'ongoing' && updated.caller_id !== user.id) {
+                document.getElementById('incomingCallModal').classList.remove('show');
+                if (ringtoneAudio) ringtoneAudio.stop();
+                const { data: caller } = await supabase
+                    .from('users')
+                    .select('name, avatar')
+                    .eq('id', updated.caller_id)
+                    .single();
+                document.getElementById('ongoingCallerName').textContent = caller?.name || 'مستخدم';
+                document.getElementById('ongoingCallerAvatar').textContent = caller?.avatar || '?';
+                document.getElementById('ongoingCallModal').classList.add('show');
+                let startTime = Date.now();
+                if (callTimerInterval) clearInterval(callTimerInterval);
+                callTimerInterval = setInterval(() => {
+                    let diff = Math.floor((Date.now() - startTime) / 1000);
+                    let mins = Math.floor(diff / 60);
+                    let secs = diff % 60;
+                    document.getElementById('callTimer').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+                }, 1000);
+            }
+        })
+        .subscribe();
+}
+
+document.getElementById('voiceCallBtn').addEventListener('click', startCall);
+document.getElementById('answerCallBtn').addEventListener('click', () => { if (currentCallId) answerCall(currentCallId); });
+document.getElementById('rejectCallBtn').addEventListener('click', () => { if (currentCallId) rejectCall(currentCallId); });
+document.getElementById('endCallBtn').addEventListener('click', endCall);
+
 // شريط الإدخال
 function updateSendBtn() {
     let has = document.getElementById('msgInput').value.trim().length > 0 || pendingImg;
@@ -780,51 +1027,61 @@ document.getElementById('hiddenFileInput').addEventListener('change', async (e) 
     e.target.value = '';
 });
 
-// رجوع ومكالمات
+// رجوع
 document.getElementById('backBtn').addEventListener('click', () => { localStorage.removeItem('currentChatId'); window.location.href='chats.html'; });
-document.getElementById('voiceCallBtn').addEventListener('click', () => toast('📞 جاري الاتصال...'));
-document.getElementById('videoCallBtn').addEventListener('click', () => toast('📹 مكالمة فيديو...'));
 
 // بدء التشغيل
 (async () => {
     user = await getCurrentUser();
-    if(!user) return;
+    if (!user) return;
     await supabase.from('users').update({ is_online: true, last_seen: new Date().toISOString() }).eq('id', user.id);
-    window.addEventListener('beforeunload', () => { supabase.from('users').update({ is_online: false, last_seen: new Date().toISOString() }).eq('id', user.id); if(msgChannel) supabase.removeChannel(msgChannel); if(typingChannel) supabase.removeChannel(typingChannel); });
+    window.addEventListener('beforeunload', () => {
+        supabase.from('users').update({ is_online: false, last_seen: new Date().toISOString() }).eq('id', user.id);
+        if (msgChannel) supabase.removeChannel(msgChannel);
+        if (typingChannel) supabase.removeChannel(typingChannel);
+        if (callsChannel) supabase.removeChannel(callsChannel);
+    });
 
     let { data: chatUser } = await supabase.from('users').select('*').eq('id', currentChatId).single();
-    if(!chatUser) { window.location.href = 'chats.html'; return; }
+    if (!chatUser) { window.location.href = 'chats.html'; return; }
     document.getElementById('chatNameDisp').textContent = chatUser.name;
     document.getElementById('chatAvatar').textContent = chatUser.avatar || '?';
     let st = document.getElementById('chatStatusDisp');
-    if(chatUser.is_online) { st.innerHTML = 'متصل الآن <span class="online-indicator"></span>'; st.className = 'chat-status online'; }
+    if (chatUser.is_online) { st.innerHTML = 'متصل الآن <span class="online-indicator"></span>'; st.className = 'chat-status online'; }
     else { st.textContent = 'آخر ظهور ' + timeAgo(chatUser.last_seen); st.className = 'chat-status'; }
-    let customNames = JSON.parse(localStorage.getItem('ramzapp_contact_names')||'{}');
-    if(customNames[currentChatId]) document.getElementById('chatNameDisp').textContent = customNames[currentChatId];
+    let customNames = JSON.parse(localStorage.getItem('ramzapp_contact_names') || '{}');
+    if (customNames[currentChatId]) document.getElementById('chatNameDisp').textContent = customNames[currentChatId];
 
     let msgs = await fetchMessages();
     document.getElementById('messagesArea').innerHTML = '';
     let lastDate = '';
     msgs.forEach(m => {
         let md = new Date(m.created_at).toDateString();
-        if(md !== lastDate) { lastDate = md; document.getElementById('messagesArea').innerHTML += `<div class="date-divider">${fmtDate(m.created_at)}</div>`; }
+        if (md !== lastDate) {
+            lastDate = md;
+            document.getElementById('messagesArea').innerHTML += `<div class="date-divider">${fmtDate(m.created_at)}</div>`;
+        }
         appendMessage(m, false);
     });
     document.getElementById('messagesArea').scrollTop = document.getElementById('messagesArea').scrollHeight;
 
     msgChannel = subscribeToMessages();
+    subscribeToCalls();
 
     let typingTimer;
     document.getElementById('msgInput').addEventListener('input', () => {
         supabase.channel('typing-'+currentChatId).send({ type:'broadcast', event:'typing', payload:{ user_id: user.id, isTyping: true } });
-        clearTimeout(typingTimer); typingTimer = setTimeout(() => { supabase.channel('typing-'+currentChatId).send({ type:'broadcast', event:'typing', payload:{ user_id: user.id, isTyping: false } }); }, 2000);
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            supabase.channel('typing-'+currentChatId).send({ type:'broadcast', event:'typing', payload:{ user_id: user.id, isTyping: false } });
+        }, 2000);
     });
     typingChannel = supabase.channel('typing-'+user.id);
     typingChannel.on('broadcast', { event:'typing' }, (payload) => {
-        if(payload.user_id === currentChatId) {
+        if (payload.user_id === currentChatId) {
             let st = document.getElementById('chatStatusDisp');
-            if(payload.isTyping) { st.innerHTML = '<span class="typing-dots"><span></span><span></span><span></span></span> يكتب الآن...'; st.className = 'chat-status typing'; }
-            else { st.innerHTML = chatUser.is_online ? 'متصل الآن <span class="online-indicator"></span>' : 'آخر ظهور ' + timeAgo(chatUser.last_seen); st.className = 'chat-status' + (chatUser.is_online ? ' online' : ''); }
+            if (payload.isTyping) st.innerHTML = '<span class="typing-dots"><span></span><span></span><span></span></span> يكتب الآن...';
+            else st.innerHTML = chatUser.is_online ? 'متصل الآن <span class="online-indicator"></span>' : 'آخر ظهور ' + timeAgo(chatUser.last_seen);
         }
     }).subscribe();
 
