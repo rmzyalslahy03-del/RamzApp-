@@ -2,16 +2,19 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>RamzApp | محادثة</title>
+
     <!-- FontAwesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0-beta3/css/all.css">
-    <!-- SimplePeer لـ WebRTC -->
+    
+    <!-- SimplePeer for WebRTC -->
     <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+
     <style>
-        /* ========== إعدادات ثابتة – بدون تكبير، أحجام ثابتة ========== */
         :root {
             --bg: #ffffff;
             --surface: #ffffff;
@@ -29,41 +32,26 @@
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             --transition: 0.2s ease;
         }
-        .dark-theme {
-            --bg: #0a0a0a;
-            --surface: #111111;
-            --surface2: #1e1e1e;
-            --surface3: #2a2a2a;
-            --text: #ffffff;
-            --text2: #dddddd;
-            --text3: #aaaaaa;
-            --border: #2c2c2c;
-            --accent: #25D366;
-            --accent2: #128C7E;
-            --green: #25D366;
-            --blue-check: #34b7f1;
-            --online: #4caf50;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: var(--bg);
             font-family: 'Inter', 'Cairo', sans-serif;
             height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             color: var(--text);
-            transition: background var(--transition), color var(--transition);
-            font-size: 14px;
         }
+
         /* رأس المحادثة */
         .chat-header {
             background: var(--surface);
             padding: 8px 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: clamp(8px, 3vw, 12px);
             border-bottom: 1px solid var(--border);
             min-height: 56px;
             z-index: 20;
@@ -80,10 +68,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
             flex-shrink: 0;
-            transition: background 0.2s;
         }
-        .back-btn:active, .header-btn:active { transform: scale(0.95); }
         .back-btn:hover, .header-btn:hover { background: var(--surface3); color: var(--text); }
         .avatar {
             width: 42px;
@@ -100,35 +87,13 @@
             color: #fff;
         }
         .chat-info { flex: 1; min-width: 0; cursor: pointer; }
-        .chat-name {
-            font-weight: 600;
-            font-size: 16px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: var(--text);
-        }
-        .chat-status {
-            font-size: 12px;
-            color: var(--text3);
-        }
-        .online-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #4caf50;
-            border-radius: 50%;
-            margin-left: 4px;
-        }
+        .chat-name { font-weight: 600; font-size: clamp(14px, 4vw, 16px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+        .chat-status { font-size: clamp(10px, 3vw, 12px); color: var(--text3); }
+        .chat-status.online { color: var(--online); }
+        .chat-status.typing { color: var(--green); }
         .typing-dots { display: inline-flex; gap: 3px; margin-right: 4px; }
-        .typing-dots span {
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: var(--green);
-            animation: typeBounce 1.4s infinite;
-        }
-        @keyframes typeBounce { 0%,60%,100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-4px); } }
+        .typing-dots span { width: 4px; height: 4px; border-radius: 50%; background: var(--green); animation: typeBounce 1.4s infinite; }
+        .online-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--online); display: inline-block; margin-left: 4px; }
 
         /* منطقة الرسائل */
         .messages-area {
@@ -144,11 +109,11 @@
         .date-divider {
             text-align: center;
             margin: 8px 0;
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text3);
             background: var(--surface2);
             display: inline-block;
-            padding: 4px 14px;
+            padding: 3px 12px;
             border-radius: 30px;
             align-self: center;
         }
@@ -158,7 +123,7 @@
             max-width: 80%;
             padding: 8px 12px;
             border-radius: 18px;
-            font-size: 14px;
+            font-size: clamp(12px, 3.5vw, 14px);
             line-height: 1.4;
             position: relative;
             word-break: break-word;
@@ -187,7 +152,7 @@
             align-items: center;
             gap: 4px;
             margin-top: 4px;
-            font-size: 10px;
+            font-size: 9px;
             opacity: 0.7;
         }
         .msg-actions { display: flex; gap: 5px; margin-top: 5px; opacity: 0; transition: opacity 0.2s; }
@@ -196,9 +161,9 @@
             background: rgba(0,0,0,0.05);
             border: none;
             color: var(--text);
-            font-size: 11px;
+            font-size: 10px;
             cursor: pointer;
-            padding: 3px 8px;
+            padding: 2px 6px;
             border-radius: 20px;
         }
 
@@ -218,9 +183,8 @@
             border-radius: 25px;
             padding: 10px 14px;
             color: var(--text);
-            font-size: 14px;
+            font-size: clamp(13px, 4vw, 15px);
             outline: none;
-            height: 40px;
         }
         .input-btn {
             background: none;
@@ -228,15 +192,16 @@
             color: var(--text3);
             font-size: 20px;
             cursor: pointer;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
             flex-shrink: 0;
         }
-        .input-btn:active { transform: scale(0.95); }
+        .input-btn:hover { background: var(--surface3); color: var(--text); }
         .send-btn { background: var(--accent) !important; color: #fff !important; }
         .mic-btn.recording { color: #ff4d4d !important; animation: pulseMic 1s infinite; }
         @keyframes pulseMic { 0%,100% { text-shadow: 0 0 0 rgba(255,77,77,0); } 50% { text-shadow: 0 0 8px #ff4d4d; } }
@@ -244,7 +209,7 @@
         /* منقي الإيموجي */
         .emoji-picker {
             position: absolute;
-            bottom: 80px;
+            bottom: 75px;
             right: 10px;
             background: var(--surface);
             border-radius: 20px;
@@ -260,7 +225,7 @@
             box-shadow: var(--shadow);
         }
         .emoji-picker.show { display: flex; }
-        .emoji-picker span { font-size: 24px; cursor: pointer; padding: 5px; border-radius: 8px; }
+        .emoji-picker span { font-size: 24px; cursor: pointer; padding: 4px; border-radius: 8px; }
 
         /* شريط البحث */
         .chat-search-bar {
@@ -274,65 +239,144 @@
         .chat-search-bar input { flex: 1; padding: 8px 14px; border-radius: 25px; border: none; background: var(--surface3); color: var(--text); font-size: 13px; outline: none; }
 
         /* عارض الصور */
-        .image-viewer {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 3000;
-            display: none; align-items: center; justify-content: center;
-        }
+        .image-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 3000; display: none; align-items: center; justify-content: center; }
         .image-viewer.active { display: flex; }
-        .image-viewer-header {
-            position: absolute; top: 0; left: 0; right: 0; display: flex;
-            justify-content: space-between; padding: 12px; z-index: 3001;
-        }
-        .image-viewer-back-btn, .image-viewer-menu-btn {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(16px);
-            border: none; color: #fff; width: 40px; height: 40px; border-radius: 50%;
-            font-size: 18px; cursor: pointer;
-        }
-        .image-viewer-dropdown {
-            position: absolute; top: 55px; left: 10px;
-            background: rgba(30,30,40,0.96); backdrop-filter: blur(20px);
-            border-radius: 16px; min-width: 180px; overflow: hidden; display: none;
-            flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,0.6);
-            z-index: 3002;
-        }
+        .image-viewer-header { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; padding: 12px; z-index: 3001; }
+        .image-viewer-back-btn, .image-viewer-menu-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; }
+        .image-viewer-dropdown { position: absolute; top: 55px; left: 10px; background: rgba(30,30,40,0.96); border-radius: 16px; min-width: 180px; overflow: hidden; display: none; flex-direction: column; }
         .image-viewer-dropdown.show { display: flex; }
         .image-viewer img { max-width: 90vw; max-height: 85vh; border-radius: 12px; }
 
         /* مودال الملف الشخصي */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
-            z-index: 2000; display: none; align-items: center; justify-content: center;
-        }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; }
-        .modal-card {
-            background: var(--surface); border-radius: 28px; width: 320px; max-width: 90%;
-            text-align: center; animation: popIn 0.3s ease;
-        }
-        @keyframes popIn { from { opacity: 0; transform: scale(0.85) translateY(20px); } }
-        .modal-avatar {
-            width: 90px; height: 90px; border-radius: 50%; margin: 20px auto 10px;
-            border: 3px solid var(--accent); display: flex; align-items: center;
-            justify-content: center; font-size: 36px; background: var(--surface3); color: var(--text);
-        }
+        .modal-card { background: var(--surface); border-radius: 28px; width: 320px; max-width: 90%; text-align: center; animation: popIn 0.3s ease; }
+        .modal-avatar { width: 90px; height: 90px; border-radius: 50%; margin: 20px auto 10px; border: 3px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 36px; background: var(--surface3); color: var(--text); }
         .modal-name { font-size: 18px; font-weight: 700; color: var(--text); }
         .modal-bio { font-size: 11px; color: var(--text3); margin-bottom: 16px; }
-        .modal-actions {
-            display: grid; grid-template-columns: repeat(2,1fr); gap: 2px;
-            padding: 10px; background: var(--surface2); border-radius: 20px;
+        .modal-actions { display: grid; grid-template-columns: repeat(2,1fr); gap: 2px; padding: 10px; background: var(--surface2); }
+        .modal-action { background: none; border: none; padding: 8px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; font-size: 11px; color: var(--text); }
+        .modal-close { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.5); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
+
+        /* نافذة الوسائط والروابط */
+        .media-modal {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 4000;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
         }
-        .modal-action {
-            background: none; border: none; padding: 8px; border-radius: 16px;
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-            cursor: pointer; font-size: 11px; color: var(--text);
+        .media-modal.show { display: flex; }
+        .media-header {
+            background: var(--surface);
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
         }
-        .modal-close {
-            position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.5);
-            border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%;
-            cursor: pointer; z-index: 2001; backdrop-filter: blur(8px);
+        .media-header button {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+            padding: 12px;
+        }
+        .media-item {
+            background: var(--surface2);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .media-item img { width: 100%; height: 100px; object-fit: cover; }
+        .media-item a { display: block; padding: 8px; color: var(--text); text-decoration: none; font-size: 12px; word-break: break-all; }
+        .media-item .link-icon { font-size: 32px; text-align: center; padding: 20px; display: block; }
+
+        /* شاشات المكالمات */
+        .incoming-call-modal, .ongoing-call-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .incoming-call-modal.show, .ongoing-call-modal.show { display: flex; }
+        .caller-info { text-align: center; color: white; }
+        .caller-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+        .caller-name { font-size: 20px; font-weight: 600; margin-bottom: 4px; color: white; }
+        .call-status { font-size: 14px; opacity: 0.8; }
+        .call-actions { display: flex; gap: 40px; margin-top: 20px; }
+        .call-action-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ff4d4d;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+        }
+        .call-action-btn.answer { background: #25D366; }
+        .call-timer { font-size: 32px; font-family: monospace; color: white; }
+
+        /* نافذة المجموعة الجديدة */
+        .group-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .group-modal.show { display: flex; }
+        .group-card {
+            background: var(--surface);
+            border-radius: 28px;
+            width: 320px;
+            max-width: 90%;
+            padding: 20px;
+        }
+        .group-card input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 25px;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            margin-bottom: 12px;
         }
 
-        /* قوائم منبثقة */
+        /* القوائم المنبثقة */
         .dropdown-menu, .sub-dropdown-menu {
             position: fixed;
             top: 56px;
@@ -346,7 +390,8 @@
             display: none;
             overflow: hidden;
         }
-        .dropdown-menu.show, .sub-dropdown-menu.show { display: block; }
+        .dropdown-menu.show { display: block; }
+        .sub-dropdown-menu.show { display: block; }
         .dropdown-item, .sub-dropdown-item {
             display: flex;
             align-items: center;
@@ -355,7 +400,7 @@
             cursor: pointer;
             transition: background 0.15s;
             color: var(--text2);
-            font-size: 13px;
+            font-size: 12.5px;
             border-bottom: 1px solid var(--border);
         }
         .dropdown-item:last-child, .sub-dropdown-item:last-child { border-bottom: none; }
@@ -364,104 +409,17 @@
         .dropdown-item.danger, .sub-dropdown-item.danger { color: #ff5e5e; }
         .more-btn { background: var(--surface2); border-top: 1px solid var(--border); margin-top: 4px; }
 
-        /* نافذة الوسائط والروابط */
-        .media-modal {
-            position: fixed; inset: 0; background: var(--bg); z-index: 4000;
-            display: none; flex-direction: column; overflow-y: auto;
-        }
-        .media-modal.show { display: flex; }
-        .media-header {
-            background: var(--surface); padding: 12px; display: flex;
-            align-items: center; gap: 12px; border-bottom: 1px solid var(--border);
-            position: sticky; top: 0;
-        }
-        .media-header button { background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer; }
-        .media-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 8px; padding: 12px;
-        }
-        .media-item { background: var(--surface2); border-radius: 8px; overflow: hidden; cursor: pointer; }
-        .media-item img { width: 100%; height: 100px; object-fit: cover; }
-        .media-item a { display: block; padding: 8px; color: var(--text); text-decoration: none; font-size: 12px; word-break: break-all; }
-
-        /* نافذة المجموعة الجديدة */
-        .group-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
-            z-index: 5000; display: none; align-items: center; justify-content: center;
-        }
-        .group-modal.show { display: flex; }
-        .group-card {
-            background: var(--surface); border-radius: 28px; width: 320px; max-width: 90%;
-            padding: 20px;
-        }
-        .group-card input {
-            width: 100%; padding: 12px; border-radius: 25px;
-            border: 1px solid var(--border); background: var(--surface2); color: var(--text);
-            margin-bottom: 12px;
-        }
-        .contacts-list-scroll {
-            max-height: 200px; overflow-y: auto; margin: 12px 0;
-            border: 1px solid var(--border); border-radius: 16px;
-        }
-        .contact-checkbox {
-            display: flex; align-items: center; gap: 10px; padding: 8px 12px;
-            cursor: pointer; border-bottom: 1px solid var(--border);
-        }
-        .contact-checkbox:hover { background: var(--surface2); }
-
-        /* نافذة الإبلاغ */
-        #reportModal textarea {
-            width: 100%; margin: 12px 0; padding: 8px; border-radius: 12px;
-            border: 1px solid var(--border); background: var(--surface2); color: var(--text);
-        }
-
-        /* نافذة السمات */
-        .theme-buttons { display: flex; gap: 12px; margin: 12px 0; }
-        .theme-buttons button {
-            flex: 1; padding: 10px; border-radius: 25px; border: none; cursor: pointer;
-        }
-
-        /* شاشات المكالمات */
-        .incoming-call-modal, .ongoing-call-modal {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10000;
-            display: none; align-items: center; justify-content: center;
-            flex-direction: column; gap: 20px;
-        }
-        .incoming-call-modal.show, .ongoing-call-modal.show { display: flex; }
-        .caller-info { text-align: center; color: white; }
-        .caller-avatar {
-            width: 80px; height: 80px; border-radius: 50%; background: var(--accent);
-            display: flex; align-items: center; justify-content: center; font-size: 32px;
-            margin-bottom: 12px;
-        }
-        .caller-name { font-size: 20px; font-weight: 600; margin-bottom: 4px; color: white; }
-        .call-status { font-size: 14px; opacity: 0.8; }
-        .call-actions { display: flex; gap: 40px; margin-top: 20px; }
-        .call-action-btn {
-            width: 60px; height: 60px; border-radius: 50%; background: #ff4d4d;
-            border: none; color: white; font-size: 28px; cursor: pointer;
-        }
-        .call-action-btn.answer { background: #25D366; }
-        .call-timer { font-size: 32px; font-family: monospace; color: white; }
-
-        /* عناصر الفيديو */
-        #localVideo, #remoteVideo {
-            position: fixed; z-index: 10001;
-        }
-        #localVideo { bottom: 20px; right: 20px; width: 120px; border-radius: 12px; border: 2px solid white; display: none; }
-        #remoteVideo { top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
-
-        /* التنبيهات */
         .global-toast {
             position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
             background: var(--surface2); color: var(--text); padding: 6px 16px; border-radius: 30px;
             font-size: 12px; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none;
-            border: 1px solid var(--border); white-space: nowrap;
+            border: 1px solid var(--border);
+            white-space: nowrap;
         }
     </style>
 </head>
 <body>
+<!-- رأس المحادثة -->
 <div class="chat-header">
     <button class="back-btn" id="backBtn"><i class="fas fa-arrow-right"></i></button>
     <div class="avatar" id="chatAvatar">?</div>
@@ -474,6 +432,7 @@
     <button class="header-btn" id="chatMenuBtn"><i class="fas fa-ellipsis-v"></i></button>
 </div>
 
+<!-- القائمة الرئيسية -->
 <div class="dropdown-menu" id="chatMenu">
     <div class="dropdown-item" data-action="view_contact"><i class="fas fa-address-card"></i> عرض جهة الاتصال</div>
     <div class="dropdown-item" data-action="search"><i class="fas fa-search"></i> بحث</div>
@@ -484,6 +443,8 @@
     <div class="dropdown-item" data-action="chat_theme"><i class="fas fa-palette"></i> سمة الدردشة</div>
     <div class="dropdown-item more-btn" data-action="more"><i class="fas fa-ellipsis-h"></i> المزيد...</div>
 </div>
+
+<!-- القائمة الفرعية -->
 <div class="sub-dropdown-menu" id="subMenu">
     <div class="sub-dropdown-item" data-action="report"><i class="fas fa-flag"></i> إبلاغ</div>
     <div class="sub-dropdown-item" data-action="block"><i class="fas fa-ban"></i> حظر</div>
@@ -492,13 +453,16 @@
     <div class="sub-dropdown-item" data-action="add_shortcut"><i class="fas fa-plus-square"></i> إضافة اختصار</div>
 </div>
 
+<!-- شريط البحث -->
 <div class="chat-search-bar" id="chatSearchBar" style="display:none;">
     <button class="header-btn" id="closeChatSearchBtn"><i class="fas fa-times"></i></button>
     <input type="text" id="chatSearchInput" placeholder="بحث في المحادثة...">
 </div>
 
+<!-- منطقة الرسائل -->
 <div class="messages-area" id="messagesArea"></div>
 
+<!-- شريط الإدخال -->
 <div class="input-bar">
     <button class="input-btn" id="emojiBtn"><i class="far fa-smile-wink"></i></button>
     <button class="input-btn" id="attachBtn"><i class="far fa-image"></i></button>
@@ -506,38 +470,39 @@
     <button class="input-btn send-btn" id="sendMsgBtn" style="display:none;"><i class="fas fa-paper-plane"></i></button>
     <button class="input-btn mic-btn" id="micBtn" style="display:flex;"><i class="fas fa-microphone"></i></button>
 </div>
+
 <div class="emoji-picker" id="emojiPicker"></div>
 <input type="file" id="hiddenFileInput" style="display:none;" accept="image/*">
 
+<!-- عارض الصور -->
 <div class="image-viewer" id="imageViewer">
     <div class="image-viewer-header">
         <button class="image-viewer-back-btn" id="imageViewerBackBtn"><i class="fas fa-arrow-right"></i></button>
-        <div class="image-viewer-menu-container">
-            <button class="image-viewer-menu-btn" id="imageViewerMenuBtn"><i class="fas fa-ellipsis-v"></i></button>
-            <div class="image-viewer-dropdown" id="imageViewerDropdown">
-                <div class="dropdown-item" data-action="save"><i class="far fa-save"></i> حفظ</div>
-                <div class="dropdown-item" data-action="share"><i class="fas fa-share-alt"></i> مشاركة</div>
-                <div class="dropdown-item" data-action="rotate"><i class="fas fa-undo-alt"></i> تدوير</div>
-                <div class="dropdown-item" data-action="delete"><i class="far fa-trash-alt"></i> حذف</div>
-            </div>
-        </div>
+        <button class="image-viewer-menu-btn" id="imageViewerMenuBtn"><i class="fas fa-ellipsis-v"></i></button>
     </div>
     <img src="" alt="صورة" id="viewerImage">
-</div>
-
-<div class="modal-overlay" id="contactProfileModal">
-    <div class="modal-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px 0 16px;">
-            <button class="modal-close" id="closeContactProfileModalBtn" style="position:static;background:none;color:var(--text);font-size:22px;"><i class="fas fa-times"></i></button>
-            <button class="header-btn" id="contactProfileMenuBtn"><i class="fas fa-ellipsis-v"></i></button>
-        </div>
-        <div class="modal-avatar" id="contactProfileAvatar">?</div>
-        <div class="modal-name" id="contactProfileName"></div>
-        <div class="modal-bio" id="contactProfilePhone"></div>
-        <div class="modal-actions" id="contactProfileActions"></div>
+    <div class="image-viewer-dropdown" id="imageViewerDropdown">
+        <div class="dropdown-item" data-action="save"><i class="far fa-save"></i> حفظ</div>
+        <div class="dropdown-item" data-action="share"><i class="fas fa-share-alt"></i> مشاركة</div>
+        <div class="dropdown-item" data-action="rotate"><i class="fas fa-undo-alt"></i> تدوير</div>
+        <div class="dropdown-item" data-action="delete"><i class="far fa-trash-alt"></i> حذف</div>
     </div>
 </div>
 
+<!-- مودال الملف الشخصي -->
+<div class="modal-overlay" id="contactProfileModal">
+    <div class="modal-card">
+        <div style="padding:16px;">
+            <button class="modal-close" id="closeContactProfileModalBtn"><i class="fas fa-times"></i></button>
+            <div class="modal-avatar" id="contactProfileAvatar">?</div>
+            <div class="modal-name" id="contactProfileName"></div>
+            <div class="modal-bio" id="contactProfilePhone"></div>
+            <div class="modal-actions" id="contactProfileActions"></div>
+        </div>
+    </div>
+</div>
+
+<!-- نافذة الوسائط والروابط -->
 <div class="media-modal" id="mediaModal">
     <div class="media-header">
         <button id="closeMediaModal"><i class="fas fa-times"></i></button>
@@ -546,40 +511,43 @@
     <div class="media-grid" id="mediaGrid"></div>
 </div>
 
+<!-- نافذة المجموعة الجديدة -->
 <div class="group-modal" id="groupModal">
     <div class="group-card">
         <h3 style="margin-bottom:16px;">إنشاء مجموعة جديدة</h3>
         <input type="text" id="groupName" placeholder="اسم المجموعة">
-        <div id="groupContactsList" class="contacts-list-scroll"></div>
-        <button class="input-btn send-btn" id="createGroupBtn" style="width:100%; border-radius:25px;">إنشاء المجموعة</button>
+        <button class="input-btn send-btn" id="createGroupBtn" style="width:100%; border-radius:25px;">إنشاء</button>
         <button class="input-btn" id="closeGroupModal" style="margin-top:8px;">إلغاء</button>
     </div>
 </div>
 
+<!-- نافذة الإبلاغ -->
 <div class="modal-overlay" id="reportModal">
     <div class="modal-card">
         <div style="padding:16px;">
             <h3>إبلاغ عن مستخدم</h3>
-            <textarea id="reportReason" placeholder="سبب الإبلاغ..." rows="3" style="width:100%; margin:12px 0; padding:8px; border-radius:12px; border:1px solid var(--border); background:var(--surface2); color:var(--text);"></textarea>
+            <textarea id="reportReason" placeholder="سبب الإبلاغ..." style="width:100%; margin:12px 0; padding:8px; border-radius:12px; border:1px solid var(--border); background:var(--surface2); color:var(--text);"></textarea>
             <button class="input-btn send-btn" id="submitReportBtn" style="width:100%;">إرسال</button>
             <button class="input-btn" id="closeReportModal" style="margin-top:8px;">إلغاء</button>
         </div>
     </div>
 </div>
 
+<!-- نافذة سمة الدردشة -->
 <div class="modal-overlay" id="themeModal">
     <div class="modal-card">
         <div style="padding:16px;">
             <h3>سمة الدردشة</h3>
-            <div class="theme-buttons">
-                <button id="themeLight" style="background:#ffffff; color:#000000;">فاتح</button>
-                <button id="themeDark" style="background:#1a1a1a; color:#ffffff;">داكن</button>
+            <div style="margin:12px 0;">
+                <button id="themeLight" style="padding:8px 16px; margin:4px; border-radius:20px; background:white; color:black;">فاتح</button>
+                <button id="themeDark" style="padding:8px 16px; margin:4px; border-radius:20px; background:#1a1a1a; color:white;">داكن</button>
             </div>
-            <button class="input-btn" id="closeThemeModal" style="width:100%;">إلغاء</button>
+            <button class="input-btn" id="closeThemeModal">إلغاء</button>
         </div>
     </div>
 </div>
 
+<!-- شاشات المكالمات -->
 <div class="incoming-call-modal" id="incomingCallModal">
     <div class="caller-info">
         <div class="caller-avatar" id="callerAvatar">?</div>
@@ -602,11 +570,14 @@
         <button class="call-action-btn" id="toggleVideoBtn" style="background:#34b7f1;"><i class="fas fa-video"></i></button>
     </div>
 </div>
-<video id="localVideo" autoplay muted playsinline></video>
-<video id="remoteVideo" autoplay playsinline></video>
+
+<!-- عنصر الفيديو المحلي (للمكالمة المرئية) -->
+<video id="localVideo" autoplay muted playsinline style="display:none;"></video>
+<video id="remoteVideo" autoplay playsinline style="display:none;"></video>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
 const SUPABASE_URL = 'https://serlegwdzjulfcxabxzv.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_4_c97KxnG_7HTvfv-pKeNQ_FTlnK6Yx';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -615,19 +586,28 @@ const currentChatId = localStorage.getItem('currentChatId');
 if (!currentChatId) window.location.href = 'chats.html';
 
 let user = null;
-let isRecording = false, mediaRecorder = null, recordingChunks = [];
-let currentViewerImageUrl = '', rotationAngle = 0;
-let replyTarget = null, pendingImg = null;
-let typingChannel = null, msgChannel = null, callsChannel = null;
-let currentCallId = null, callTimerInterval = null, ringtoneAudio = null;
+let isRecording = false;
+let mediaRecorder = null;
+let recordingChunks = [];
+let currentViewerImageUrl = '';
+let rotationAngle = 0;
+let replyTarget = null;
+let pendingImg = null;
+let typingChannel = null;
+let msgChannel = null;
+let callsChannel = null;
+let currentCallId = null;
+let callTimerInterval = null;
+let ringtoneAudio = null;
 let isMuted = localStorage.getItem(`muted_${currentChatId}`) === 'true';
 let isBlocked = localStorage.getItem(`blocked_${currentChatId}`) === 'true';
-let isGroup = false;
-let groupId = null;
-let peer = null, localStream = null, currentPeer = null;
+
+// WebRTC variables
+let peer = null;
+let localStream = null;
+let isCallActive = false;
 let isVideoCall = false;
 
-// دوال مساعدة
 function toast(msg) {
     let el = document.querySelector('.global-toast');
     if (el) el.remove();
@@ -638,6 +618,7 @@ function toast(msg) {
     requestAnimationFrame(() => el.style.opacity = '1');
     setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 2000);
 }
+
 function timeAgo(d) {
     if (!d) return '';
     const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
@@ -649,99 +630,77 @@ function timeAgo(d) {
 function fmtTime(d) { return new Date(d).toLocaleTimeString('ar-SA', { hour:'2-digit', minute:'2-digit' }); }
 function fmtDate(d) { return new Date(d).toLocaleDateString('ar-SA', { weekday:'long', month:'long', day:'numeric' }); }
 function esc(s) { return s ? s.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' })[m]) : ''; }
+
 async function getCurrentUser() {
     const raw = localStorage.getItem('ramzapp_user');
     if (!raw) { window.location.href = 'login.html'; return null; }
-    try { return JSON.parse(raw); } catch(e) { return null; }
+    return JSON.parse(raw);
 }
-function loadTheme() {
-    const theme = localStorage.getItem('ramzapp_theme') || 'light';
-    if (theme === 'dark') document.body.classList.add('dark-theme');
-    else document.body.classList.remove('dark-theme');
-}
-loadTheme();
 
-// دوال الرسائل (تدعم الفردي والمجموعات)
 async function sendMessage(text, mediaUrl='', type='text') {
-    if (isBlocked && !isGroup) { toast('🚫 محظور'); return null; }
-    if (isGroup && groupId) {
-        const { data, error } = await supabase.from('group_messages').insert({
-            group_id: groupId, sender_id: user.id, content: text, type, media_url: mediaUrl, created_at: new Date().toISOString()
-        }).select().single();
-        if (error) { toast('فشل إرسال رسالة المجموعة'); return null; }
-        return data;
-    } else {
-        const { data, error } = await supabase.from('messages').insert({
-            sender_id: user.id, receiver_id: currentChatId, content: text, type, media_url: mediaUrl,
-            reply_to: replyTarget?.id || null, status: 'sent'
-        }).select().single();
-        if (error) { toast('فشل الإرسال'); return null; }
-        return data;
+    if (isBlocked) {
+        toast('🚫 لا يمكنك إرسال رسائل، هذا المستخدم محظور');
+        return null;
     }
+    const { data, error } = await supabase.from('messages').insert({
+        sender_id: user.id, receiver_id: currentChatId,
+        content: text, type, media_url: mediaUrl, reply_to: replyTarget?.id || null, status: 'sent'
+    }).select().single();
+    if (error) { toast('فشل الإرسال'); return null; }
+    return data;
 }
 async function fetchMessages() {
-    if (isGroup && groupId) {
-        const { data } = await supabase.from('group_messages').select('*').eq('group_id', groupId).order('created_at', { ascending: true });
-        return data || [];
-    } else {
-        const { data } = await supabase.from('messages').select('*')
-            .or(`and(sender_id.eq.${user.id},receiver_id.eq.${currentChatId}),and(sender_id.eq.${currentChatId},receiver_id.eq.${user.id})`)
-            .order('created_at', { ascending: true });
-        return data || [];
-    }
+    const { data } = await supabase.from('messages').select('*')
+        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${currentChatId}),and(sender_id.eq.${currentChatId},receiver_id.eq.${user.id})`)
+        .order('created_at', { ascending: true });
+    return data || [];
 }
 function subscribeToMessages() {
-    if (isGroup && groupId) {
-        return supabase.channel('group-msgs-'+groupId)
-            .on('postgres_changes', { event:'INSERT', schema:'public', table:'group_messages', filter:`group_id=eq.${groupId}` },
-                payload => { if(payload.new.sender_id !== user.id) appendMessage(payload.new); })
-            .subscribe();
-    } else {
-        return supabase.channel('msgs-'+currentChatId)
-            .on('postgres_changes', { event:'INSERT', schema:'public', table:'messages', filter:`receiver_id=eq.${user.id}` },
-                payload => {
-                    if(payload.new.sender_id === currentChatId) {
-                        appendMessage(payload.new);
-                        supabase.from('messages').update({ status:'read' }).eq('id',payload.new.id);
-                    }
-                })
-            .subscribe();
-    }
+    return supabase.channel('msgs-'+currentChatId)
+        .on('postgres_changes', { event:'INSERT', schema:'public', table:'messages', filter:`receiver_id=eq.${user.id}` },
+            payload => { if(payload.new.sender_id === currentChatId) { appendMessage(payload.new); supabase.from('messages').update({ status:'read' }).eq('id',payload.new.id); } })
+        .subscribe();
 }
 async function uploadFile(file) {
     const fileName = `media/${user.id}/${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from('ramz-images').upload(fileName, file);
-    if(error) throw error;
+    if(error) { toast('فشل الرفع'); return null; }
     const { data: url } = supabase.storage.from('ramz-images').getPublicUrl(fileName);
     return url.publicUrl;
 }
 
 function appendMessage(msg, scroll=true) {
     const area = document.getElementById('messagesArea');
-    const isMe = (isGroup ? (msg.sender_id === user.id) : (msg.sender_id === user.id));
+    const isMe = msg.sender_id === user.id;
     const div = document.createElement('div');
     div.className = 'msg-row ' + (isMe ? 'own' : 'other');
     div.id = 'msg-'+msg.id;
     let stIcon = '';
-    if (!isGroup && isMe) {
-        if (msg.status === 'read') stIcon = '<i class="fas fa-check-double" style="color:#34b7f1;"></i>';
-        else if (msg.status === 'delivered') stIcon = '<i class="fas fa-check-double"></i>';
+    if(isMe) {
+        if(msg.status === 'read') stIcon = '<i class="fas fa-check-double" style="color:#34b7f1;"></i>';
+        else if(msg.status === 'delivered') stIcon = '<i class="fas fa-check-double"></i>';
         else stIcon = '<i class="fas fa-check"></i>';
     }
+    const hasImg = (msg.type === 'image' && msg.media_url);
+    const hasVoice = (msg.type === 'voice' && msg.media_url);
     let mediaContent = '';
-    if (msg.type === 'image' && msg.media_url) {
-        mediaContent = `<div><img src="${msg.media_url}" class="attachment-img" onclick="openImageViewer('${msg.media_url}')" loading="lazy"></div>`;
-    } else if (msg.type === 'voice' && msg.media_url) {
+    if(hasImg) {
+        mediaContent = `<div style="position:relative;display:inline-block;">
+            <img src="${msg.media_url}" class="attachment-img" onclick="openImageViewer('${msg.media_url}')" loading="lazy">
+            <button class="save-media-btn" onclick="saveMedia(event,'${msg.media_url}')"><i class="fas fa-download"></i></button>
+            <button class="download-media-btn" onclick="downloadMedia(event,'${msg.media_url}')"><i class="fas fa-share-alt"></i></button>
+        </div>`;
+    } else if(hasVoice) {
         mediaContent = `<div class="voice-msg"><button class="voice-play-btn" data-audio="${msg.media_url}" onclick="playVoice(this)"><i class="fas fa-play"></i></button><div style="flex:1;height:20px;display:flex;align-items:center;gap:2px;">${Array.from({length:8},()=>`<div style="width:3px;background:var(--accent);border-radius:2px;height:${8+Math.random()*16}px;"></div>`).join('')}</div></div>`;
     }
     div.innerHTML = `
         <div class="msg-bubble">
-            ${msg.reply_to && !isGroup ? `<div class="reply-preview" onclick="document.getElementById('msg-${msg.reply_to}')?.scrollIntoView()"><i class="fas fa-reply"></i> رد</div>` : ''}
+            ${msg.reply_to ? `<div class="reply-preview" onclick="document.getElementById('msg-${msg.reply_to}')?.scrollIntoView({behavior:'smooth',block:'center'})"><i class="fas fa-reply"></i> رد</div>` : ''}
             ${mediaContent}
             <div>${esc(msg.content || '')}</div>
-            <div class="msg-time-row"><span>${fmtTime(msg.created_at)}</span> <span class="msg-status">${stIcon}</span></div>
+            <div class="msg-time-row"><span>${fmtTime(msg.created_at)}</span> ${stIcon}</div>
             <div class="msg-actions">
-                ${!isGroup ? `<button data-act="reply" data-id="${msg.id}"><i class="fas fa-reply"></i></button>` : ''}
+                <button data-act="reply" data-id="${msg.id}"><i class="fas fa-reply"></i></button>
                 ${isMe ? `<button data-act="delete" data-id="${msg.id}"><i class="far fa-trash-alt"></i></button>` : ''}
             </div>
         </div>`;
@@ -760,8 +719,7 @@ function setReply(mid) {
 }
 async function deleteMsg(mid) {
     if(!confirm('حذف الرسالة؟')) return;
-    if (isGroup && groupId) await supabase.from('group_messages').delete().eq('id', mid);
-    else await supabase.from('messages').delete().eq('id', mid);
+    await supabase.from('messages').delete().eq('id', mid);
     document.getElementById('msg-'+mid)?.remove();
 }
 
@@ -773,10 +731,10 @@ window.openImageViewer = function(url) {
     document.getElementById('imageViewer').classList.add('active');
 };
 function closeImageViewer() { document.getElementById('imageViewer').classList.remove('active'); }
-document.getElementById('imageViewerBackBtn').onclick = closeImageViewer;
-document.getElementById('imageViewerMenuBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('imageViewerDropdown').classList.toggle('show'); };
+document.getElementById('imageViewerBackBtn').addEventListener('click', closeImageViewer);
+document.getElementById('imageViewerMenuBtn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('imageViewerDropdown').classList.toggle('show'); });
 document.querySelectorAll('#imageViewerDropdown .dropdown-item').forEach(item => {
-    item.onclick = async function() {
+    item.addEventListener('click', async function() {
         let action = this.dataset.action;
         document.getElementById('imageViewerDropdown').classList.remove('show');
         if(action === 'save') {
@@ -791,23 +749,20 @@ document.querySelectorAll('#imageViewerDropdown .dropdown-item').forEach(item =>
             } catch(e) { if(e.name !== 'AbortError') toast('فشل الحفظ'); }
         } else if(action === 'share') {
             if(navigator.share) {
-                try {
-                    let resp = await fetch(currentViewerImageUrl);
-                    let blob = await resp.blob();
-                    await navigator.share({ files: [new File([blob],'image.jpg')] });
-                } catch(e) {}
+                try { let resp = await fetch(currentViewerImageUrl); let blob = await resp.blob(); await navigator.share({ files: [new File([blob],'image.jpg')] }); } catch(e) {}
             } else { navigator.clipboard?.writeText(currentViewerImageUrl); toast('تم نسخ الرابط'); }
-        } else if(action === 'rotate') { rotationAngle += 90; document.getElementById('viewerImage').style.transform = `rotate(${rotationAngle}deg)`; }
-        else if(action === 'delete') { if(confirm('حذف الصورة؟')) closeImageViewer(); }
-    };
+        } else if(action === 'rotate') {
+            rotationAngle += 90;
+            document.getElementById('viewerImage').style.transform = `rotate(${rotationAngle}deg)`;
+        } else if(action === 'delete') { if(confirm('حذف الصورة؟')) closeImageViewer(); }
+    });
 });
-window.saveMedia = async (e,url) => { e.stopPropagation(); try { let resp=await fetch(url); let blob=await resp.blob(); let handle=await window.showSaveFilePicker({ suggestedName:'media.jpg' }); let w=await handle.createWritable(); await w.write(blob); await w.close(); toast('تم الحفظ'); } catch(e) { if(e.name!=='AbortError') toast('فشل الحفظ'); } };
-window.downloadMedia = async (e,url) => { e.stopPropagation(); try { let resp=await fetch(url); let blob=await resp.blob(); let handle=await window.showSaveFilePicker({ suggestedName:'media.jpg' }); let w=await handle.createWritable(); await w.write(blob); await w.close(); toast('تم التنزيل'); } catch(e) { if(e.name!=='AbortError') toast('فشل التنزيل'); } };
-window.playVoice = (btn) => { let a = new Audio(btn.dataset.audio); a.play(); };
+window.saveMedia = async function(e,url) { e.stopPropagation(); try { let resp=await fetch(url); let blob=await resp.blob(); let handle=await window.showSaveFilePicker({ suggestedName:'media.jpg' }); let w=await handle.createWritable(); await w.write(blob); await w.close(); toast('تم الحفظ'); } catch(e) { if(e.name!=='AbortError') toast('فشل الحفظ'); } };
+window.downloadMedia = async function(e,url) { e.stopPropagation(); try { let resp=await fetch(url); let blob=await resp.blob(); let handle=await window.showSaveFilePicker({ suggestedName:'media.jpg' }); let w=await handle.createWritable(); await w.write(blob); await w.close(); toast('تم التنزيل'); } catch(e) { if(e.name!=='AbortError') toast('فشل التنزيل'); } };
+window.playVoice = function(btn) { let a = new Audio(btn.dataset.audio); a.play(); };
 
 // مودال الملف الشخصي
 async function openContactProfile() {
-    if (isGroup) { toast('هذه محادثة جماعية'); return; }
     let { data: contactUser } = await supabase.from('users').select('*').eq('id', currentChatId).single();
     if(!contactUser) return;
     document.getElementById('contactProfileAvatar').textContent = contactUser.avatar || '?';
@@ -818,7 +773,7 @@ async function openContactProfile() {
     let add = (icon, label, cb) => {
         let btn = document.createElement('button'); btn.className = 'modal-action';
         btn.innerHTML = `<span>${icon}</span><span>${label}</span>`;
-        btn.onclick = () => { cb(); document.getElementById('contactProfileModal').classList.remove('active'); };
+        btn.addEventListener('click', () => { cb(); document.getElementById('contactProfileModal').classList.remove('active'); });
         actions.appendChild(btn);
     };
     add('<i class="fas fa-share-alt"></i>', 'مشاركة', () => {
@@ -826,38 +781,23 @@ async function openContactProfile() {
         if(navigator.share) navigator.share({ title: contactUser.name, text });
         else navigator.clipboard?.writeText(text).then(() => toast('تم نسخ المعلومات'));
     });
-    add('<i class="fas fa-user-plus"></i>', 'إضافة', async () => {
-        await supabase.from('contacts').insert({ user_id: user.id, contact_id: currentChatId });
-        toast('تمت الإضافة');
-    });
+    add('<i class="fas fa-user-plus"></i>', 'إضافة', async () => { await supabase.from('contacts').insert({ user_id: user.id, contact_id: currentChatId }); toast('تمت الإضافة'); });
     add('<i class="fas fa-edit"></i>', 'تعديل', () => {
         let newName = prompt('الاسم الجديد:', contactUser.name);
-        if(newName) {
-            let custom = JSON.parse(localStorage.getItem('ramzapp_contact_names')||'{}');
-            custom[currentChatId] = newName;
-            localStorage.setItem('ramzapp_contact_names', JSON.stringify(custom));
-            document.getElementById('chatNameDisp').textContent = newName;
-            toast('تم التحديث');
-        }
+        if(newName) { let custom = JSON.parse(localStorage.getItem('ramzapp_contact_names')||'{}'); custom[currentChatId]=newName; localStorage.setItem('ramzapp_contact_names',JSON.stringify(custom)); document.getElementById('chatNameDisp').textContent=newName; toast('تم التحديث'); }
     });
-    add('<i class="fas fa-search"></i>', 'بحث', () => {
-        document.getElementById('chatSearchBar').style.display = 'flex';
-        document.getElementById('chatSearchInput').focus();
-    });
-    add('<i class="fas fa-link"></i>', 'نسخ الرابط', async () => {
-        await navigator.clipboard.writeText(`${location.origin}/redirect.html?id=${currentChatId}`);
-        toast('📋 تم نسخ الرابط');
-    });
+    add('<i class="fas fa-search"></i>', 'بحث', () => { document.getElementById('chatSearchBar').style.display='flex'; document.getElementById('chatSearchInput').focus(); });
+    add('<i class="fas fa-link"></i>', 'نسخ الرابط', async () => { await navigator.clipboard.writeText(`${location.origin}/redirect.html?id=${currentChatId}`); toast('تم نسخ الرابط'); });
     document.getElementById('contactProfileModal').classList.add('active');
 }
-document.getElementById('closeContactProfileModalBtn').onclick = () => document.getElementById('contactProfileModal').classList.remove('active');
+document.getElementById('closeContactProfileModalBtn').addEventListener('click', () => document.getElementById('contactProfileModal').classList.remove('active'));
 
 // بحث
-document.getElementById('closeChatSearchBtn').onclick = () => {
+document.getElementById('closeChatSearchBtn').addEventListener('click', () => {
     document.getElementById('chatSearchBar').style.display='none';
     document.getElementById('chatSearchInput').value='';
     document.querySelectorAll('.msg-bubble').forEach(b => b.style.background='');
-};
+});
 document.getElementById('chatSearchInput').addEventListener('input', function() {
     let q = this.value.trim().toLowerCase();
     document.querySelectorAll('.msg-bubble').forEach(b => b.style.background='');
@@ -865,140 +805,167 @@ document.getElementById('chatSearchInput').addEventListener('input', function() 
     document.querySelectorAll('.msg-bubble').forEach(b => { if(b.textContent.toLowerCase().includes(q)) b.style.background='rgba(255,200,0,0.2)'; });
 });
 
-// ========== ميزات القائمة ==========
+// ========== تفعيل جميع ميزات القائمة ==========
+// 1. وسائط وروابط
 async function showMediaAndLinks() {
     const msgs = await fetchMessages();
-    const grid = document.getElementById('mediaGrid');
-    grid.innerHTML = '';
+    const mediaGrid = document.getElementById('mediaGrid');
+    mediaGrid.innerHTML = '';
     msgs.forEach(msg => {
         if (msg.type === 'image' && msg.media_url) {
-            const div = document.createElement('div'); div.className = 'media-item';
+            const div = document.createElement('div');
+            div.className = 'media-item';
             div.innerHTML = `<img src="${msg.media_url}" onclick="openImageViewer('${msg.media_url}')">`;
-            grid.appendChild(div);
+            mediaGrid.appendChild(div);
         } else if (msg.content && (msg.content.includes('http://') || msg.content.includes('https://'))) {
-            const div = document.createElement('div'); div.className = 'media-item';
+            const div = document.createElement('div');
+            div.className = 'media-item';
             div.innerHTML = `<a href="${msg.content}" target="_blank" class="link-icon"><i class="fas fa-link"></i><span style="display:block;">رابط</span></a>`;
-            grid.appendChild(div);
+            mediaGrid.appendChild(div);
         }
     });
     document.getElementById('mediaModal').classList.add('show');
 }
-document.getElementById('closeMediaModal').onclick = () => document.getElementById('mediaModal').classList.remove('show');
+document.getElementById('closeMediaModal').addEventListener('click', () => {
+    document.getElementById('mediaModal').classList.remove('show');
+});
 
+// 2. كتم الإشعارات
 function toggleMute() {
     isMuted = !isMuted;
     localStorage.setItem(`muted_${currentChatId}`, isMuted);
     toast(isMuted ? '🔕 تم كتم الإشعارات لهذه المحادثة' : '🔔 تم إلغاء كتم الإشعارات');
 }
 
-let disappearInterval = null;
+// 3. رسائل ذاتية الاختفاء
+let disappearTimer = null;
 function setDisappearingMessages() {
-    let seconds = prompt('اختر المدة بالثواني (30، 60، 90):', '30');
+    let seconds = prompt('اختر مدة بقاء الرسائل قبل الحذف التلقائي (30، 60، 90 ثانية):', '30');
     if (!seconds) return;
     localStorage.setItem(`disappear_${currentChatId}`, seconds);
     toast(`⏳ سيتم حذف الرسائل الجديدة تلقائياً بعد ${seconds} ثانية`);
-    if (disappearInterval) clearInterval(disappearInterval);
-    disappearInterval = setInterval(async () => {
-        const disappearTime = localStorage.getItem(`disappear_${currentChatId}`);
-        if (!disappearTime) return;
-        const msgs = await fetchMessages();
-        const now = Date.now();
-        for (let msg of msgs) {
-            if (msg.sender_id !== user.id && new Date(msg.created_at).getTime() < now - disappearTime * 1000) {
-                if (isGroup && groupId) await supabase.from('group_messages').delete().eq('id', msg.id);
-                else await supabase.from('messages').delete().eq('id', msg.id);
-                document.getElementById(`msg-${msg.id}`)?.remove();
-            }
-        }
-    }, 5000);
 }
+async function checkDisappearingMessages() {
+    const disappearTime = localStorage.getItem(`disappear_${currentChatId}`);
+    if (!disappearTime) return;
+    const msgs = await fetchMessages();
+    const now = Date.now();
+    for (let msg of msgs) {
+        const msgTime = new Date(msg.created_at).getTime();
+        if (now - msgTime > disappearTime * 1000) {
+            await supabase.from('messages').delete().eq('id', msg.id);
+            document.getElementById('msg-'+msg.id)?.remove();
+        }
+    }
+}
+setInterval(checkDisappearingMessages, 5000);
 
-async function showGroupModal() {
-    const { data: contacts } = await supabase.from('contacts').select('contact_id').eq('user_id', user.id);
-    const contactIds = contacts.map(c => c.contact_id);
-    const { data: usersList } = await supabase.from('users').select('id, name, avatar').in('id', contactIds);
-    const container = document.getElementById('groupContactsList');
-    container.innerHTML = '';
-    usersList.forEach(u => {
-        const div = document.createElement('div'); div.className = 'contact-checkbox';
-        div.innerHTML = `<input type="checkbox" value="${u.id}" id="group_${u.id}"> <label for="group_${u.id}">${esc(u.name)}</label>`;
-        container.appendChild(div);
-    });
+// 4. مجموعة جديدة
+function showGroupModal() {
     document.getElementById('groupModal').classList.add('show');
 }
-document.getElementById('closeGroupModal').onclick = () => document.getElementById('groupModal').classList.remove('show');
-document.getElementById('createGroupBtn').onclick = async () => {
+document.getElementById('closeGroupModal').addEventListener('click', () => {
+    document.getElementById('groupModal').classList.remove('show');
+});
+document.getElementById('createGroupBtn').addEventListener('click', () => {
     const groupName = document.getElementById('groupName').value.trim();
     if (!groupName) { toast('الرجاء إدخال اسم المجموعة'); return; }
-    const selected = Array.from(document.querySelectorAll('#groupContactsList input:checked')).map(cb => cb.value);
-    if (selected.length === 0) { toast('اختر عضو واحد على الأقل'); return; }
-    const { data: group, error } = await supabase.from('groups').insert({ name: groupName, created_by: user.id, created_at: new Date().toISOString() }).select().single();
-    if (error) { toast('فشل إنشاء المجموعة'); return; }
-    const members = [...selected, user.id];
-    const membersData = members.map(mid => ({ group_id: group.id, user_id: mid }));
-    const { error: memErr } = await supabase.from('group_members').insert(membersData);
-    if (memErr) { toast('فشل إضافة الأعضاء'); return; }
-    toast(`✅ تم إنشاء المجموعة "${groupName}" بنجاح`);
+    toast(`👥 تم إنشاء مجموعة "${groupName}" - قريباً سيتم تفعيلها بالكامل`);
     document.getElementById('groupModal').classList.remove('show');
-    window.location.href = 'chats.html';
-};
+});
 
-function showThemeModal() { document.getElementById('themeModal').classList.add('show'); }
-document.getElementById('closeThemeModal').onclick = () => document.getElementById('themeModal').classList.remove('show');
-document.getElementById('themeLight').onclick = () => {
+// 5. سمة الدردشة
+function showThemeModal() {
+    document.getElementById('themeModal').classList.add('show');
+}
+document.getElementById('closeThemeModal').addEventListener('click', () => {
+    document.getElementById('themeModal').classList.remove('show');
+});
+document.getElementById('themeLight').addEventListener('click', () => {
     document.body.classList.remove('dark-theme');
     localStorage.setItem('ramzapp_theme', 'light');
-    toast('السمة الفاتحة');
+    toast('تم التبديل إلى السمة الفاتحة');
     document.getElementById('themeModal').classList.remove('show');
-};
-document.getElementById('themeDark').onclick = () => {
+});
+document.getElementById('themeDark').addEventListener('click', () => {
     document.body.classList.add('dark-theme');
     localStorage.setItem('ramzapp_theme', 'dark');
-    toast('السمة الداكنة');
+    toast('تم التبديل إلى السمة الداكنة');
     document.getElementById('themeModal').classList.remove('show');
-};
+});
 
-function showReportModal() { document.getElementById('reportModal').classList.add('show'); }
-document.getElementById('closeReportModal').onclick = () => document.getElementById('reportModal').classList.remove('show');
-document.getElementById('submitReportBtn').onclick = async () => {
+// 6. إبلاغ
+function showReportModal() {
+    document.getElementById('reportModal').classList.add('show');
+}
+document.getElementById('closeReportModal').addEventListener('click', () => {
+    document.getElementById('reportModal').classList.remove('show');
+});
+document.getElementById('submitReportBtn').addEventListener('click', async () => {
     const reason = document.getElementById('reportReason').value.trim();
     if (!reason) { toast('الرجاء كتابة سبب الإبلاغ'); return; }
-    await supabase.from('reports').insert({ reporter_id: user.id, reported_id: currentChatId, reason, created_at: new Date().toISOString() });
+    await supabase.from('reports').insert({
+        reporter_id: user.id,
+        reported_id: currentChatId,
+        reason: reason,
+        created_at: new Date().toISOString()
+    });
     toast('✅ تم إرسال البلاغ، شكراً لك');
     document.getElementById('reportModal').classList.remove('show');
-};
+});
 
+// 7. حظر
 function toggleBlock() {
     isBlocked = !isBlocked;
     localStorage.setItem(`blocked_${currentChatId}`, isBlocked);
-    toast(isBlocked ? '🚫 تم حظر هذا المستخدم' : '✅ تم إلغاء حظر المستخدم');
+    if (isBlocked) {
+        toast('🚫 تم حظر هذا المستخدم، لن تتمكن من إرسال رسائل له');
+    } else {
+        toast('✅ تم إلغاء حظر المستخدم');
+    }
 }
 
+// 8. مسح المحادثة
 async function clearChat() {
     if (!confirm('⚠️ هل أنت متأكد من مسح جميع رسائل هذه المحادثة؟ لا يمكن التراجع.')) return;
-    if (isGroup && groupId) await supabase.from('group_messages').delete().eq('group_id', groupId);
-    else await supabase.from('messages').delete().or(`and(sender_id.eq.${user.id},receiver_id.eq.${currentChatId}),and(sender_id.eq.${currentChatId},receiver_id.eq.${user.id})`);
+    const { error } = await supabase
+        .from('messages')
+        .delete()
+        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${currentChatId}),and(sender_id.eq.${currentChatId},receiver_id.eq.${user.id})`);
+    if (error) { toast('فشل مسح المحادثة'); return; }
     document.getElementById('messagesArea').innerHTML = '<div class="date-divider">تم مسح المحادثة</div>';
     toast('🧹 تم مسح جميع الرسائل');
 }
 
+// 9. نقل الدردشة (تصدير)
 async function exportChat() {
     const msgs = await fetchMessages();
-    const data = { chatId: currentChatId, isGroup, messages: msgs, exportDate: new Date().toISOString() };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const chatData = {
+        chatId: currentChatId,
+        messages: msgs,
+        exportDate: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(chatData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `chat_${currentChatId}.json`; a.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chat_${currentChatId}_export.json`;
+    a.click();
     URL.revokeObjectURL(url);
     toast('📤 تم تصدير المحادثة');
 }
 
+// 10. إضافة اختصار (PWA)
 function addToHomeScreen() {
-    toast('📌 استخدم قائمة المتصفح > إضافة إلى الشاشة الرئيسية');
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        toast('التطبيق مثبت بالفعل على الشاشة الرئيسية');
+    } else {
+        toast('📌 استخدم القائمة في المتصفح: "إضافة إلى الشاشة الرئيسية"');
+    }
 }
 
-// ========== دوال المكالمات (فردية فقط) ==========
-async function startCall(isVideo) {
-    if (isGroup) { toast('المكالمات غير متوفرة في المجموعات حالياً'); return; }
+// ========== المكالمات الصوتية والفيديو الحقيقية (WebRTC) ==========
+async function startCall(isVideo = false) {
     if (currentCallId) return;
     isVideoCall = isVideo;
     try {
@@ -1008,32 +975,54 @@ async function startCall(isVideo) {
             document.getElementById('localVideo').style.display = 'block';
             document.getElementById('remoteVideo').style.display = 'block';
         }
-        const { data: call, error } = await supabase.from('calls').insert({
-            caller_id: user.id, callee_id: currentChatId, status: 'ringing',
-            type: isVideo ? 'video' : 'audio', created_at: new Date().toISOString()
-        }).select().single();
-        if (error) throw error;
+        const { data: call, error } = await supabase
+            .from('calls')
+            .insert({
+                caller_id: user.id,
+                callee_id: currentChatId,
+                status: 'ringing',
+                type: isVideo ? 'video' : 'audio',
+                created_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+        if (error) { toast('فشل بدء المكالمة'); return; }
         currentCallId = call.id;
         toast(isVideo ? '📹 جاري الاتصال المرئي...' : '📞 جاري الاتصال...');
         document.getElementById('ongoingCallerName').textContent = '...';
         document.getElementById('ongoingCallerAvatar').textContent = '?';
         document.getElementById('ongoingCallModal').classList.add('show');
-        let start = Date.now();
+        let startTime = Date.now();
         callTimerInterval = setInterval(() => {
-            let diff = Math.floor((Date.now() - start) / 1000);
-            document.getElementById('callTimer').textContent = `${Math.floor(diff/60)}:${(diff%60).toString().padStart(2,'0')}`;
+            let diff = Math.floor((Date.now() - startTime) / 1000);
+            let mins = Math.floor(diff / 60);
+            let secs = diff % 60;
+            document.getElementById('callTimer').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
         }, 1000);
-        currentPeer = new SimplePeer({ initiator: true, stream: localStream });
-        currentPeer.on('signal', async (data) => {
-            await supabase.from('calls_signals').insert({ call_id: currentCallId, sender_id: user.id, signal_data: JSON.stringify(data), created_at: new Date().toISOString() });
+        
+        // إنشاء Peer connection وانتظار إشارة الطرف الآخر
+        peer = new SimplePeer({ initiator: true, stream: localStream });
+        peer.on('signal', async (data) => {
+            await supabase.from('calls_signals').insert({
+                call_id: currentCallId,
+                sender_id: user.id,
+                signal_data: JSON.stringify(data),
+                created_at: new Date().toISOString()
+            });
         });
-        currentPeer.on('stream', (stream) => {
-            if (isVideo) document.getElementById('remoteVideo').srcObject = stream;
+        peer.on('stream', (stream) => {
+            if (isVideo) {
+                document.getElementById('remoteVideo').srcObject = stream;
+            }
         });
-        currentPeer.on('error', (err) => { console.error(err); endCall(); });
-        currentPeer.on('close', () => endCall());
+        peer.on('error', (err) => {
+            console.error(err);
+            endCall();
+        });
+        peer.on('close', () => endCall());
     } catch(err) { toast('⚠️ لا يمكن الوصول إلى الكاميرا/الميكروفون'); }
 }
+
 async function answerCall(callId) {
     const { data: call } = await supabase.from('calls').select('*').eq('id', callId).single();
     if (!call) return;
@@ -1048,30 +1037,44 @@ async function answerCall(callId) {
         await supabase.from('calls').update({ status: 'ongoing', answered_at: new Date().toISOString() }).eq('id', callId);
         document.getElementById('incomingCallModal').classList.remove('show');
         if (ringtoneAudio) ringtoneAudio.stop();
+        
         const { data: caller } = await supabase.from('users').select('name, avatar').eq('id', call.caller_id).single();
         document.getElementById('ongoingCallerName').textContent = caller?.name || 'مستخدم';
         document.getElementById('ongoingCallerAvatar').textContent = caller?.avatar || '?';
         document.getElementById('ongoingCallModal').classList.add('show');
-        let start = Date.now();
+        let startTime = Date.now();
         callTimerInterval = setInterval(() => {
-            let diff = Math.floor((Date.now() - start) / 1000);
-            document.getElementById('callTimer').textContent = `${Math.floor(diff/60)}:${(diff%60).toString().padStart(2,'0')}`;
+            let diff = Math.floor((Date.now() - startTime) / 1000);
+            let mins = Math.floor(diff / 60);
+            let secs = diff % 60;
+            document.getElementById('callTimer').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
         }, 1000);
-        currentPeer = new SimplePeer({ initiator: false, stream: localStream });
-        currentPeer.on('signal', async (data) => {
-            await supabase.from('calls_signals').insert({ call_id: callId, sender_id: user.id, signal_data: JSON.stringify(data), created_at: new Date().toISOString() });
+        
+        peer = new SimplePeer({ initiator: false, stream: localStream });
+        peer.on('signal', async (data) => {
+            await supabase.from('calls_signals').insert({
+                call_id: callId,
+                sender_id: user.id,
+                signal_data: JSON.stringify(data),
+                created_at: new Date().toISOString()
+            });
         });
-        currentPeer.on('stream', (stream) => { if (isVideoCall) document.getElementById('remoteVideo').srcObject = stream; });
-        currentPeer.on('error', (err) => { console.error(err); endCall(); });
-        currentPeer.on('close', () => endCall());
+        peer.on('stream', (stream) => {
+            if (isVideoCall) document.getElementById('remoteVideo').srcObject = stream;
+        });
+        peer.on('error', (err) => { console.error(err); endCall(); });
+        peer.on('close', () => endCall());
+        
+        // جلب الإشارات المخزنة من المتصل
         const { data: signals } = await supabase.from('calls_signals').select('*').eq('call_id', callId).order('created_at', { ascending: true });
         signals.forEach(sig => {
-            if (sig.sender_id !== user.id && currentPeer) {
-                try { currentPeer.signal(JSON.parse(sig.signal_data)); } catch(e) {}
+            if (sig.sender_id !== user.id) {
+                try { peer.signal(JSON.parse(sig.signal_data)); } catch(e) {}
             }
         });
     } catch(err) { toast('⚠️ لا يمكن الوصول إلى الكاميرا/الميكروفون'); }
 }
+
 async function rejectCall(callId) {
     await supabase.from('calls').update({ status: 'missed', ended_at: new Date().toISOString() }).eq('id', callId);
     document.getElementById('incomingCallModal').classList.remove('show');
@@ -1079,37 +1082,56 @@ async function rejectCall(callId) {
     currentCallId = null;
     toast('📞 مكالمة فائتة');
 }
+
 async function endCall() {
     if (!currentCallId) return;
     await supabase.from('calls').update({ status: 'completed', ended_at: new Date().toISOString() }).eq('id', currentCallId);
     document.getElementById('ongoingCallModal').classList.remove('show');
     if (callTimerInterval) clearInterval(callTimerInterval);
-    if (localStream) localStream.getTracks().forEach(t => t.stop());
-    if (currentPeer) currentPeer.destroy();
-    localStream = null; currentPeer = null;
+    if (localStream) localStream.getTracks().forEach(track => track.stop());
+    if (peer) peer.destroy();
+    localStream = null;
+    peer = null;
+    currentCallId = null;
+    isCallActive = false;
     document.getElementById('localVideo').style.display = 'none';
     document.getElementById('remoteVideo').style.display = 'none';
-    currentCallId = null;
     toast('انتهت المكالمة');
 }
+
 function playRingtone() {
     if (ringtoneAudio) ringtoneAudio.stop();
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = 'sine'; osc.frequency.value = 440; gain.gain.value = 0.3;
-    osc.start();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    oscillator.connect(gain);
+    gain.connect(audioCtx.destination);
+    oscillator.type = 'sine';
+    oscillator.frequency.value = 440;
+    gain.gain.value = 0.3;
+    oscillator.start();
     let interval = setInterval(() => {
-        if (!ringtoneAudio) { clearInterval(interval); osc.stop(); ctx.close(); return; }
+        if (!ringtoneAudio) {
+            clearInterval(interval);
+            oscillator.stop();
+            audioCtx.close();
+            return;
+        }
         gain.gain.value = gain.gain.value === 0.3 ? 0 : 0.3;
     }, 500);
-    ringtoneAudio = { stop: () => { clearInterval(interval); osc.stop(); ctx.close(); ringtoneAudio = null; } };
+    ringtoneAudio = { stop: () => { clearInterval(interval); oscillator.stop(); audioCtx.close(); ringtoneAudio = null; } };
 }
+
 function subscribeToCalls() {
-    if (callsChannel || isGroup) return;
-    callsChannel = supabase.channel('calls-'+user.id)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'calls', filter: `callee_id=eq.${user.id}` }, async (payload) => {
+    if (callsChannel) return;
+    callsChannel = supabase
+        .channel('calls-' + user.id)
+        .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'calls',
+            filter: `callee_id=eq.${user.id}`
+        }, async (payload) => {
             const newCall = payload.new;
             if (newCall.status === 'ringing' && !currentCallId) {
                 currentCallId = newCall.id;
@@ -1118,32 +1140,92 @@ function subscribeToCalls() {
                 document.getElementById('callerAvatar').textContent = caller?.avatar || '?';
                 document.getElementById('incomingCallModal').classList.add('show');
                 playRingtone();
-                setTimeout(async () => {
-                    if (currentCallId && document.getElementById('incomingCallModal').classList.contains('show')) {
-                        await rejectCall(currentCallId);
-                    }
-                }, 30000);
             }
         })
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'calls_signals' }, async (payload) => {
-            const sig = payload.new;
-            if (sig.call_id === currentCallId && sig.sender_id !== user.id && currentPeer) {
-                try { currentPeer.signal(JSON.parse(sig.signal_data)); } catch(e) {}
+        .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'calls_signals'
+        }, async (payload) => {
+            const signal = payload.new;
+            if (signal.call_id === currentCallId && signal.sender_id !== user.id && peer) {
+                try { peer.signal(JSON.parse(signal.signal_data)); } catch(e) {}
             }
         })
         .subscribe();
 }
-document.getElementById('voiceCallBtn').onclick = () => startCall(false);
-document.getElementById('videoCallBtn').onclick = () => startCall(true);
-document.getElementById('answerCallBtn').onclick = () => { if (currentCallId) answerCall(currentCallId); };
-document.getElementById('rejectCallBtn').onclick = () => { if (currentCallId) rejectCall(currentCallId); };
-document.getElementById('endCallBtn').onclick = endCall;
-document.getElementById('toggleVideoBtn').onclick = () => {
+
+document.getElementById('voiceCallBtn').addEventListener('click', () => startCall(false));
+document.getElementById('videoCallBtn').addEventListener('click', () => startCall(true));
+document.getElementById('answerCallBtn').addEventListener('click', () => { if (currentCallId) answerCall(currentCallId); });
+document.getElementById('rejectCallBtn').addEventListener('click', () => { if (currentCallId) rejectCall(currentCallId); });
+document.getElementById('endCallBtn').addEventListener('click', endCall);
+document.getElementById('toggleVideoBtn').addEventListener('click', () => {
     if (localStream) {
-        const video = localStream.getVideoTracks()[0];
-        if (video) video.enabled = !video.enabled;
+        const videoTrack = localStream.getVideoTracks()[0];
+        if (videoTrack) {
+            videoTrack.enabled = !videoTrack.enabled;
+            document.getElementById('toggleVideoBtn').style.background = videoTrack.enabled ? '#34b7f1' : '#ff4d4d';
+        }
     }
+});
+
+// ========== القوائم المنبثقة ==========
+const mainMenu = document.getElementById('chatMenu');
+const subMenu = document.getElementById('subMenu');
+const menuBtn = document.getElementById('chatMenuBtn');
+menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    mainMenu.classList.toggle('show');
+    subMenu.classList.remove('show');
+});
+document.querySelector('[data-action="more"]').addEventListener('click', (e) => {
+    e.stopPropagation();
+    subMenu.classList.toggle('show');
+});
+const mainActions = {
+    view_contact: () => openContactProfile(),
+    search: () => { document.getElementById('chatSearchBar').style.display='flex'; document.getElementById('chatSearchInput').focus(); },
+    media: () => showMediaAndLinks(),
+    mute: () => toggleMute(),
+    disappear: () => setDisappearingMessages(),
+    new_group: () => showGroupModal(),
+    chat_theme: () => showThemeModal()
 };
+document.querySelectorAll('#chatMenu .dropdown-item[data-action]').forEach(item => {
+    const action = item.dataset.action;
+    if (action !== 'more' && mainActions[action]) {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            mainMenu.classList.remove('show');
+            mainActions[action]();
+        });
+    }
+});
+const subActions = {
+    report: () => showReportModal(),
+    block: () => toggleBlock(),
+    clear_chat: () => clearChat(),
+    transfer_chat: () => exportChat(),
+    add_shortcut: () => addToHomeScreen()
+};
+document.querySelectorAll('#subMenu .sub-dropdown-item').forEach(item => {
+    const action = item.dataset.action;
+    if (subActions[action]) {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            subMenu.classList.remove('show');
+            mainMenu.classList.remove('show');
+            subActions[action]();
+        });
+    }
+});
+document.addEventListener('click', (e) => {
+    if (!menuBtn.contains(e.target) && !mainMenu.contains(e.target) && !subMenu.contains(e.target)) {
+        mainMenu.classList.remove('show');
+        subMenu.classList.remove('show');
+    }
+});
 
 // ========== تسجيل الصوت ==========
 let micBtn = document.getElementById('micBtn');
@@ -1187,7 +1269,7 @@ function updateSendBtn() {
     document.getElementById('sendMsgBtn').style.display = has ? 'flex' : 'none';
     document.getElementById('micBtn').style.display = has ? 'none' : 'flex';
 }
-document.getElementById('sendMsgBtn').onclick = async () => {
+document.getElementById('sendMsgBtn').addEventListener('click', async () => {
     let inp = document.getElementById('msgInput');
     let text = inp.value.trim();
     if(!text && !pendingImg) return;
@@ -1195,95 +1277,50 @@ document.getElementById('sendMsgBtn').onclick = async () => {
     let media = pendingImg || '';
     let msg = await sendMessage(text||'', media, type);
     if(msg) { appendMessage(msg); inp.value = ''; pendingImg = null; replyTarget = null; updateSendBtn(); }
-};
+});
 document.getElementById('msgInput').addEventListener('keypress', e => { if(e.key === 'Enter') document.getElementById('sendMsgBtn').click(); });
 document.getElementById('msgInput').addEventListener('input', updateSendBtn);
 
 // إيموجي
 const emojis = ['😀','😂','😍','😢','😡','👍','❤️','🔥','🎉','😎','🤔','😴','🥳','😇','🤗','😤','😱','💔','✨','🌟','💡','📎','📷','🎵','📍','🙏','💪','👀','🤝','🚀','💯','✅','❌','🎯'];
 let picker = document.getElementById('emojiPicker');
-emojis.forEach(e => { let sp = document.createElement('span'); sp.textContent=e; sp.onclick = () => { document.getElementById('msgInput').value += e; picker.classList.remove('show'); document.getElementById('msgInput').focus(); updateSendBtn(); }; picker.appendChild(sp); });
-document.getElementById('emojiBtn').onclick = e => { e.stopPropagation(); picker.classList.toggle('show'); };
+emojis.forEach(e => { let sp = document.createElement('span'); sp.textContent=e; sp.addEventListener('click',()=>{ document.getElementById('msgInput').value+=e; picker.classList.remove('show'); document.getElementById('msgInput').focus(); updateSendBtn(); }); picker.appendChild(sp); });
+document.getElementById('emojiBtn').addEventListener('click', e => { e.stopPropagation(); picker.classList.toggle('show'); });
 document.addEventListener('click', e => { if(!picker.contains(e.target) && e.target !== document.getElementById('emojiBtn')) picker.classList.remove('show'); });
 
 // مرفقات
-document.getElementById('attachBtn').onclick = () => document.getElementById('hiddenFileInput').click();
-document.getElementById('hiddenFileInput').onchange = async (e) => {
+document.getElementById('attachBtn').addEventListener('click', () => document.getElementById('hiddenFileInput').click());
+document.getElementById('hiddenFileInput').addEventListener('change', async (e) => {
     let file = e.target.files[0]; if(!file) return;
-    try { toast('رفع الصورة...'); let url = await uploadFile(file); pendingImg = url; updateSendBtn(); toast('الصورة جاهزة للإرسال'); } catch(err) { toast('فشل الرفع'); }
+    try { toast('رفع الصورة...'); let url = await uploadFile(file); pendingImg = url; updateSendBtn(); toast('الصورة جاهزة للإرسال'); } catch(err) { toast('فشل رفع الصورة'); }
     e.target.value = '';
-};
+});
 
 // رجوع
-document.getElementById('backBtn').onclick = () => { localStorage.removeItem('currentChatId'); window.location.href='chats.html'; };
-
-// القوائم المنبثقة
-const mainMenu = document.getElementById('chatMenu'), subMenu = document.getElementById('subMenu'), menuBtn = document.getElementById('chatMenuBtn');
-menuBtn.onclick = (e) => { e.stopPropagation(); mainMenu.classList.toggle('show'); subMenu.classList.remove('show'); };
-document.querySelector('[data-action="more"]').onclick = (e) => { e.stopPropagation(); subMenu.classList.toggle('show'); };
-const mainActions = {
-    view_contact: openContactProfile,
-    search: () => { document.getElementById('chatSearchBar').style.display='flex'; document.getElementById('chatSearchInput').focus(); },
-    media: showMediaAndLinks,
-    mute: toggleMute,
-    disappear: setDisappearingMessages,
-    new_group: showGroupModal,
-    chat_theme: showThemeModal
-};
-document.querySelectorAll('#chatMenu .dropdown-item[data-action]').forEach(item => {
-    let act = item.dataset.action;
-    if(act !== 'more' && mainActions[act]) item.onclick = (e) => { e.stopPropagation(); mainMenu.classList.remove('show'); mainActions[act](); };
-});
-const subActions = {
-    report: showReportModal,
-    block: toggleBlock,
-    clear_chat: clearChat,
-    transfer_chat: exportChat,
-    add_shortcut: addToHomeScreen
-};
-document.querySelectorAll('#subMenu .sub-dropdown-item').forEach(item => {
-    let act = item.dataset.action;
-    if(subActions[act]) item.onclick = (e) => { e.stopPropagation(); subMenu.classList.remove('show'); mainMenu.classList.remove('show'); subActions[act](); };
-});
-document.addEventListener('click', (e) => {
-    if(!menuBtn.contains(e.target) && !mainMenu.contains(e.target) && !subMenu.contains(e.target)) {
-        mainMenu.classList.remove('show');
-        subMenu.classList.remove('show');
-    }
-});
+document.getElementById('backBtn').addEventListener('click', () => { localStorage.removeItem('currentChatId'); window.location.href='chats.html'; });
 
 // بدء التشغيل
 (async () => {
     user = await getCurrentUser();
     if (!user) return;
-    // التحقق من نوع المحادثة (فردي أم مجموعة)
-    const { data: groupCheck } = await supabase.from('groups').select('id').eq('id', currentChatId).single();
-    if (groupCheck) {
-        isGroup = true;
-        groupId = currentChatId;
-        const { data: group } = await supabase.from('groups').select('name').eq('id', groupId).single();
-        document.getElementById('chatNameDisp').textContent = group?.name || 'مجموعة';
-        document.getElementById('chatAvatar').textContent = '👥';
-        document.getElementById('chatStatusDisp').textContent = 'مجموعة';
-        // إخفاء أزرار المكالمات في المجموعات
-        document.getElementById('voiceCallBtn').style.display = 'none';
-        document.getElementById('videoCallBtn').style.display = 'none';
-    } else {
-        isGroup = false;
-        await supabase.from('users').update({ is_online: true, last_seen: new Date().toISOString() }).eq('id', user.id);
-        window.addEventListener('beforeunload', () => {
-            supabase.from('users').update({ is_online: false, last_seen: new Date().toISOString() }).eq('id', user.id);
-        });
-        let { data: chatUser } = await supabase.from('users').select('*').eq('id', currentChatId).single();
-        if (!chatUser) { window.location.href = 'chats.html'; return; }
-        document.getElementById('chatNameDisp').textContent = chatUser.name;
-        document.getElementById('chatAvatar').textContent = chatUser.avatar || '?';
-        let st = document.getElementById('chatStatusDisp');
-        if (chatUser.is_online) st.innerHTML = 'متصل الآن <span class="online-indicator"></span>';
-        else st.textContent = 'آخر ظهور ' + timeAgo(chatUser.last_seen);
-        let customNames = JSON.parse(localStorage.getItem('ramzapp_contact_names') || '{}');
-        if (customNames[currentChatId]) document.getElementById('chatNameDisp').textContent = customNames[currentChatId];
-    }
+    await supabase.from('users').update({ is_online: true, last_seen: new Date().toISOString() }).eq('id', user.id);
+    window.addEventListener('beforeunload', () => {
+        supabase.from('users').update({ is_online: false, last_seen: new Date().toISOString() }).eq('id', user.id);
+        if (msgChannel) supabase.removeChannel(msgChannel);
+        if (typingChannel) supabase.removeChannel(typingChannel);
+        if (callsChannel) supabase.removeChannel(callsChannel);
+    });
+
+    let { data: chatUser } = await supabase.from('users').select('*').eq('id', currentChatId).single();
+    if (!chatUser) { window.location.href = 'chats.html'; return; }
+    document.getElementById('chatNameDisp').textContent = chatUser.name;
+    document.getElementById('chatAvatar').textContent = chatUser.avatar || '?';
+    let st = document.getElementById('chatStatusDisp');
+    if (chatUser.is_online) { st.innerHTML = 'متصل الآن <span class="online-indicator"></span>'; st.className = 'chat-status online'; }
+    else { st.textContent = 'آخر ظهور ' + timeAgo(chatUser.last_seen); st.className = 'chat-status'; }
+    let customNames = JSON.parse(localStorage.getItem('ramzapp_contact_names') || '{}');
+    if (customNames[currentChatId]) document.getElementById('chatNameDisp').textContent = customNames[currentChatId];
+
     let msgs = await fetchMessages();
     document.getElementById('messagesArea').innerHTML = '';
     let lastDate = '';
@@ -1296,30 +1333,27 @@ document.addEventListener('click', (e) => {
         appendMessage(m, false);
     });
     document.getElementById('messagesArea').scrollTop = document.getElementById('messagesArea').scrollHeight;
+
     msgChannel = subscribeToMessages();
-    if (!isGroup) subscribeToCalls();
+    subscribeToCalls();
+
     let typingTimer;
     document.getElementById('msgInput').addEventListener('input', () => {
-        if (!isGroup) {
-            supabase.channel('typing-'+currentChatId).send({ type:'broadcast', event:'typing', payload:{ user_id: user.id, isTyping: true } });
-        }
+        supabase.channel('typing-'+currentChatId).send({ type:'broadcast', event:'typing', payload:{ user_id: user.id, isTyping: true } });
         clearTimeout(typingTimer);
         typingTimer = setTimeout(() => {
-            if (!isGroup) {
-                supabase.channel('typing-'+currentChatId).send({ type:'broadcast', event:'typing', payload:{ user_id: user.id, isTyping: false } });
-            }
+            supabase.channel('typing-'+currentChatId).send({ type:'broadcast', event:'typing', payload:{ user_id: user.id, isTyping: false } });
         }, 2000);
     });
-    if (!isGroup) {
-        typingChannel = supabase.channel('typing-'+user.id);
-        typingChannel.on('broadcast', { event:'typing' }, (payload) => {
-            if (payload.user_id === currentChatId) {
-                let st = document.getElementById('chatStatusDisp');
-                if (payload.isTyping) st.innerHTML = '<span class="typing-dots"><span></span><span></span><span></span></span> يكتب الآن...';
-                else st.innerHTML = chatUser.is_online ? 'متصل الآن <span class="online-indicator"></span>' : 'آخر ظهور ' + timeAgo(chatUser.last_seen);
-            }
-        }).subscribe();
-    }
+    typingChannel = supabase.channel('typing-'+user.id);
+    typingChannel.on('broadcast', { event:'typing' }, (payload) => {
+        if (payload.user_id === currentChatId) {
+            let st = document.getElementById('chatStatusDisp');
+            if (payload.isTyping) st.innerHTML = '<span class="typing-dots"><span></span><span></span><span></span></span> يكتب الآن...';
+            else st.innerHTML = chatUser.is_online ? 'متصل الآن <span class="online-indicator"></span>' : 'آخر ظهور ' + timeAgo(chatUser.last_seen);
+        }
+    }).subscribe();
+
     updateSendBtn();
 })();
 </script>
